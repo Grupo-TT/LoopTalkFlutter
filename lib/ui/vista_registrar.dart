@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'vista_recuperar.dart';
-import 'vista_registrar.dart'; 
 
-bool _obscurePasswordLogin = true; 
+bool _obscurePassword = true;
+bool _obscurePasswordConfirm = true;
 
-class VistaLogin extends StatefulWidget {
-  const VistaLogin({super.key});
+
+class VistaRegistrar extends StatefulWidget {
+  const VistaRegistrar({super.key});
 
   @override
-  State<VistaLogin> createState() => _VistaLoginState();
+  State<VistaRegistrar> createState() => _VistaRegistrarState();
 }
 
-class _VistaLoginState extends State<VistaLogin> {
+class _VistaRegistrarState extends State<VistaRegistrar> {
   @override
   Widget build(BuildContext context) {
     final alto = MediaQuery.of(context).size.height;
@@ -23,49 +23,66 @@ class _VistaLoginState extends State<VistaLogin> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              //Espacio en blanco para mantener a altura
+              /// Botón volver
               Align(
                 alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: const SizedBox(),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.purple, size: 32),
+                  onPressed: () {
+                    Navigator.pop(context); // vuelve a la vista login
+                  },
                 ),
               ),
 
               const SizedBox(height: 5),
-              
-              /// Imagen arriba (25% del alto de pantalla)
+
+              /// Logo (25% del alto de pantalla)
               SizedBox(
                 height: alto * 0.25,
                 child: Center(
                   child: Image.asset(
-                    "assets/logo.png", // aquí va el logo, si tuviera uno *Inserte meme del papá de Timmy Turner
+                    "assets/logo.png",
                     fit: BoxFit.contain,
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+
+              const SizedBox(height: 10),
 
               /// Título
               const Text(
-                "¡Hola!",
+                "Crea tu cuenta",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 5),
 
               /// Subtítulo
               const Text(
-                "Por favor, ingresa tus datos.",
+                "Para empezar, completa los siguientes datos",
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.blueGrey,
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 30),
+
+              const SizedBox(height: 15),
+
+              /// Campo Nombre Completo
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "Nombre Completo",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
 
               /// Campo Email
               TextField(
@@ -76,11 +93,12 @@ class _VistaLoginState extends State<VistaLogin> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
 
               /// Campo Contraseña
               TextField(
-                obscureText: _obscurePasswordLogin,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: "Contraseña",
                   border: OutlineInputBorder(
@@ -88,42 +106,45 @@ class _VistaLoginState extends State<VistaLogin> {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePasswordLogin ? Icons.visibility : Icons.visibility_off,
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
                       color: Colors.grey,
                     ),
                     onPressed: () {
                       setState(() {
-                        _obscurePasswordLogin = !_obscurePasswordLogin;
+                        _obscurePassword = !_obscurePassword;
                       });
                     },
                   ),
                 ),
               ),
 
-              /// Enlace Olvidaste tu contraseña
-              Container(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const VistaRecuperar(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    "¿Olvidaste tu contraseña?",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.blue,
+              const SizedBox(height: 20),
+
+              /// Campo Confirmar Contraseña
+              TextField(
+                obscureText: _obscurePasswordConfirm,
+                decoration: InputDecoration(
+                  labelText: "Confirmar contraseña",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePasswordConfirm ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePasswordConfirm = !_obscurePasswordConfirm;
+                      });
+                    },
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
 
-              /// Botón Ingresar
+              const SizedBox(height: 30),
+
+              /// Botón Registrarse
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -133,39 +154,35 @@ class _VistaLoginState extends State<VistaLogin> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                  ), //Texto del Botón
+                  ),
                   onPressed: () {
-                    // lógica para ingresar
+                    // lógica para registrar
                   },
                   child: const Text(
-                    "Ingresar",
+                    "Regístrate",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
 
-              /// Enlace Registro
+              const SizedBox(height: 5),
+
+              /// Texto con enlace
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "¿No tienes una cuenta? ",
-                    style: TextStyle(color: Colors.blueGrey,)
-                    ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const VistaRegistrar(),
-                        ),
-                      );
+                    "¿Ya tienes una cuenta?",
+                    style: TextStyle(color: Colors.blueGrey),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // vuelve al login
                     },
                     child: const Text(
-                      "Regístrate",
+                      "Inicia sesión",
                       style: TextStyle(
-                        color: Colors.blue,
+                        color: Colors.purple,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

@@ -30,7 +30,7 @@ class _VistaRecuperarState extends State<VistaRecuperar> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 5),
 
               /// Logo (25% del alto de pantalla)
               SizedBox(
@@ -61,7 +61,7 @@ class _VistaRecuperarState extends State<VistaRecuperar> {
                 "¡No te preocupes! Ingresa el email asociado a tu cuenta. Te enviaremos las instrucciones de recuperación.",
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey,
+                  color: Colors.blueGrey,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -78,7 +78,7 @@ class _VistaRecuperarState extends State<VistaRecuperar> {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
               /// Botón Enviar
               SizedBox(

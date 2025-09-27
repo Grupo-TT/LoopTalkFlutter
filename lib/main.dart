@@ -4,7 +4,7 @@ import 'ui/vista_login.dart';
 
 Future<void> main() async {
   // Cargar variables de entorno desde .env
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "assets/.env");
 
   runApp(const LoopTalkApp());
 }
