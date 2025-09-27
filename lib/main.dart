@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'ui/vista_login.dart';
+import 'repository/loop_talk_service_api.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bloc/auth_bloc.dart'; 
 
 Future<void> main() async {
   // Cargar variables de entorno desde .env
   await dotenv.load(fileName: "assets/.env");
+  final authService = LoopTalkServiceApi();
 
-  runApp(const LoopTalkApp());
-}
+
+runApp(
+    BlocProvider(
+      create: (_) => AuthBloc(authService),
+      child: const LoopTalkApp(),
+    ),
+  );}
 
 class LoopTalkApp extends StatelessWidget {
   const LoopTalkApp({super.key});
