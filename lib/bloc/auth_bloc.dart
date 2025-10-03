@@ -4,6 +4,8 @@ import 'auth_state.dart';
 import '../../repository/loop_talk_service_api.dart';
 import '../../model/usuario.dart';
 import '../../utils/token_storage.dart'; // 👈 la clase que creamos
+import 'package:loop_talk/model/rol.dart';
+
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoopTalkServiceApi authService;
@@ -23,7 +25,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           id: 0,
           nombre: "Usuario",
           correoElectronico: event.correo,
-          rol: "ESTUDIANTE",
+          rol: Rol.estudiante,
         );
 
         emit(AuthSuccess(usuario));

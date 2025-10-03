@@ -1,14 +1,17 @@
+import 'package:loop_talk/model/rol.dart';
 class Usuario {
   final int id;
   final String nombre;
   final String correoElectronico;
-  final String rol;
+  final String? password;
+  final Rol rol;
 
   Usuario({
     required this.id,
     required this.nombre,
     required this.correoElectronico,
     required this.rol,
+    this.password
   });
 
   /// Crear un Usuario desde JSON
@@ -28,6 +31,13 @@ class Usuario {
       'nombre': nombre,
       'correoElectronico': correoElectronico,
       'rol': rol,
+    };
+  }
+
+  Map<String, dynamic> toJsonLogin() {
+    return {
+      'correoElectronico': correoElectronico.toLowerCase(),
+      'contrasenia': password
     };
   }
 }
