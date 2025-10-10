@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../../model/topico.dart';
 
 
 class TopicoService {
@@ -26,7 +27,13 @@ class TopicoService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      // ✅ Extraemos la lista de 'content'
+      final List<dynamic> contenido = data['content'];
+
+      // ✅ Convertimos cada elemento a un Topico
+      return contenido.map((json) => Topico.fromJson(json)).toList();
     } else {
       throw Exception("Error: ${response.statusCode} - ${response.body}");
     }
