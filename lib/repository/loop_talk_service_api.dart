@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../model/usuario.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoopTalkServiceApi {
   final String baseUrl = dotenv.env['API_URL']!;
@@ -20,6 +22,9 @@ class LoopTalkServiceApi {
     );
 
     if (response.statusCode == 200) {
+      final token = response.body;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
       return response.body; // Aquí viene el token JWT
     } else {
       throw Exception("Error en login: ${response.statusCode} - ${response.body}");
