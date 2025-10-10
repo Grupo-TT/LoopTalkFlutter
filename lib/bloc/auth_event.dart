@@ -27,3 +27,6 @@ class RegisterEvent extends AuthEvent {
   @override
   List<Object?> get props => [nombre, correo, contrasenia];
 }
+
+/// Evento para cerrar sesión
+class LogoutEvent extends AuthEvent {}

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../model/usuario.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../utils/token_storage.dart'; // Importar TokenStorage
 
 
 class LoopTalkServiceApi {
@@ -22,10 +23,10 @@ class LoopTalkServiceApi {
     );
 
     if (response.statusCode == 200) {
-      final token = response.body;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-      return response.body; // Aquí viene el token JWT
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      final String jwtToken = data['jwTtoken']; // Extraer solo el valor del JWT
+      await TokenStorage.saveToken(jwtToken); // Guardar solo el JWT
+      return jwtToken; // Devolver solo el JWT
     } else {
       throw Exception("Error en login: ${response.statusCode} - ${response.body}");
     }
@@ -39,9 +40,15 @@ class LoopTalkServiceApi {
   }) async {
     final url = Uri.parse("$baseUrl/registro");
 
+    final Map<String, String> requestHeaders = {
+      "Content-Type": "application/json",
+    };
+    // Asegurarse de que no se envíe ninguna cabecera de autorización para el registro
+    requestHeaders.remove("Authorization");
+
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
+      headers: requestHeaders,
       body: jsonEncode({
         "nombre": nombre,
         "correoElectronico": correo,

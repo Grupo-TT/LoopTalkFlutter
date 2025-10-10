@@ -1,17 +1,16 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../model/topico.dart';
+import '../../utils/token_storage.dart'; // Importar TokenStorage
 
 
 class TopicoService {
   final String baseUrl = dotenv.env['API_URL']!;
 
-  Future<List<dynamic>> obtenerTopicos() async {
+  Future<List<Topico>> obtenerTopicos() async {
     final url = Uri.parse("$baseUrl/topico");
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    final token = await TokenStorage.getToken();
 
     if (token == null) {
       throw Exception("No se encontró el token. El usuario no ha iniciado sesión.");

@@ -1,4 +1,3 @@
-// lib/bloc/topico/topico_state.dart
 import 'package:equatable/equatable.dart';
 import '../../model/topico.dart';
 
@@ -6,7 +5,7 @@ abstract class TopicoState extends Equatable {
   const TopicoState();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
 class TopicoInitial extends TopicoState {}
@@ -19,14 +18,14 @@ class TopicoLoaded extends TopicoState {
   const TopicoLoaded(this.topicos);
 
   @override
-  List<Object?> get props => [topicos];
+  List<Object> get props => [topicos];
 }
 
-class TopicoFailure extends TopicoState {
-  final String error;
+class TopicoError extends TopicoState {
+  final String message;
 
-  const TopicoFailure(this.error);
+  const TopicoError(this.message);
 
   @override
-  List<Object?> get props => [error];
+  List<Object> get props => [message];
 }
