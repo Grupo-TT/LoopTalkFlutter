@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/topico_bloc.dart';
 import '../../bloc/topico_event.dart';
 import '../../bloc/topico_state.dart';
-import '../../bloc/auth_bloc.dart'; // Importar AuthBloc
-import '../../bloc/auth_event.dart'; // Importar AuthEvent
-import '../../bloc/auth_state.dart'; // Importar AuthState
-import 'vista_login.dart'; // Importar VistaLogin
+import '../../bloc/auth_bloc.dart';
+import '../../bloc/auth_event.dart';
+import '../../bloc/auth_state.dart';
+import 'vista_login.dart';
 
 class VistaTopicos extends StatefulWidget {
   const VistaTopicos({super.key});
@@ -27,7 +27,6 @@ class _VistaTopicosState extends State<VistaTopicos> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthInitial) {
-          // Navegar de vuelta a la pantalla de login si el usuario cierra sesión
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const VistaLogin()),
@@ -44,7 +43,7 @@ class _VistaTopicosState extends State<VistaTopicos> {
           leading: Builder(
             builder: (BuildContext context) {
               return IconButton(
-                icon: const Icon(Icons.menu), // Icono de hamburguesa
+                icon: const Icon(Icons.menu),
                 onPressed: () { Scaffold.of(context).openDrawer(); },
                 tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
               );
@@ -53,15 +52,11 @@ class _VistaTopicosState extends State<VistaTopicos> {
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
-              onPressed: () {
-                // Lógica para buscar
-              },
+              onPressed: () {},
             ),
             IconButton(
               icon: const Icon(Icons.more_vert),
-              onPressed: () {
-                // Lógica para más opciones
-              },
+              onPressed: () {},
             ),
           ],
         ),
@@ -85,13 +80,10 @@ class _VistaTopicosState extends State<VistaTopicos> {
                 leading: const Icon(Icons.logout),
                 title: const Text('Cerrar Sesión'),
                 onTap: () {
-                  // Cierra el drawer
                   Navigator.pop(context);
-                  // Dispara el evento de logout
                   context.read<AuthBloc>().add(LogoutEvent());
                 },
               ),
-              // Puedes añadir más opciones aquí
             ],
           ),
         ),
@@ -113,7 +105,6 @@ class _VistaTopicosState extends State<VistaTopicos> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header del post (Autor y Categoria)
                           Row(
                             children: [
                               const CircleAvatar(
@@ -137,7 +128,6 @@ class _VistaTopicosState extends State<VistaTopicos> {
                           ),
                           const SizedBox(height: 10),
 
-                          // Título del Tópico
                           Text(
                             topico.titulo,
                             style: const TextStyle(
@@ -147,14 +137,12 @@ class _VistaTopicosState extends State<VistaTopicos> {
                           ),
                           const SizedBox(height: 8),
 
-                          // Mensaje del Tópico
                           Text(
                             topico.mensaje,
                             style: const TextStyle(fontSize: 14),
                           ),
                           const SizedBox(height: 12),
 
-                          // Footer del post (Upvotes, Downvotes, Comentarios)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

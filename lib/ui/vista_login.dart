@@ -5,7 +5,7 @@ import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
 import 'vista_recuperar.dart';
 import 'vista_registrar.dart';
-import 'vista_topicos.dart'; // Importar la nueva vista de tópicos
+import 'vista_topicos.dart';
 
 bool _obscurePasswordLogin = true;
 
@@ -42,15 +42,18 @@ class _VistaLoginState extends State<VistaLogin> {
 
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is AuthSuccess) {
-            // Navegar a la vista de tópicos después del login exitoso
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const VistaTopicos(),
-              ),
-            );
+            await Future.delayed(const Duration(milliseconds: 100));
+            
+            if (context.mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const VistaTopicos(),
+                ),
+              );
+            }
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),
@@ -81,7 +84,7 @@ class _VistaLoginState extends State<VistaLogin> {
                     height: alto * 0.25,
                     child: Center(
                       child: Image.asset(
-                        "assets/logo.png", // aquí va el logo, si tuviera uno *Inserte meme del papá de Timmy Turner
+                        "assets/logo.png",
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -178,8 +181,8 @@ class _VistaLoginState extends State<VistaLogin> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                            ), //Texto del Botón
-                            onPressed: _login, // Llama a la función _login
+                            ),
+                            onPressed: _login,
                             child: const Text(
                               "Ingresar",
                               style: TextStyle(color: Colors.white),

@@ -3,7 +3,7 @@ import 'auth_event.dart';
 import 'auth_state.dart';
 import '../../repository/loop_talk_service_api.dart';
 import '../../model/usuario.dart';
-import '../../utils/token_storage.dart'; // 👈 la clase que creamos
+import '../../utils/token_storage.dart';
 import 'package:loop_talk/model/rol.dart';
 
 
@@ -11,16 +11,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoopTalkServiceApi authService;
 
   AuthBloc(this.authService) : super(AuthInitial()) {
-    /// LOGIN
     on<LoginEvent>((event, emit) async {
       emit(AuthLoading());
       try {
         final token = await authService.login(event.correo, event.contrasenia);
-
-        // Guardamos el token de forma segura
         await TokenStorage.saveToken(token);
 
-        // Crear usuario "fake" si el backend no lo devuelve
         final usuario = Usuario(
           id: 0,
           nombre: "Usuario",
@@ -34,7 +30,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
-    /// REGISTRO
     on<RegisterEvent>((event, emit) async {
       emit(AuthLoading());
       try {
@@ -44,13 +39,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           contrasenia: event.contrasenia,
         );
 
-        emit(AuthSuccess(usuario)); // ✅ ya es un Usuario
+        emit(AuthSuccess(usuario));
       } catch (e) {
         emit(AuthFailure(e.toString()));
       }
     });
 
-    /// LOGOUT
     on<LogoutEvent>((event, emit) async {
       await TokenStorage.deleteToken();
       emit(AuthInitial());

@@ -1,19 +1,18 @@
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import '../../model/topico.dart';
-import '../../utils/token_storage.dart'; // Importar TokenStorage
+import '../../utils/token_storage.dart';
 
 
 class TopicoService {
-  final String baseUrl = dotenv.env['API_URL']!;
+  final String baseUrl = 'http://18.222.231.135:8080';
 
   Future<List<Topico>> obtenerTopicos() async {
     final url = Uri.parse("$baseUrl/topico");
     final token = await TokenStorage.getToken();
 
-    if (token == null) {
-      throw Exception("No se encontró el token. El usuario no ha iniciado sesión.");
+    if (token == null || token.isEmpty) {
+      throw Exception("No se encontró el token");
     }
 
     final response = await http.get(
@@ -22,19 +21,18 @@ class TopicoService {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
-      
     );
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body);
-
-      // ✅ Extraemos la lista de 'content'
       final List<dynamic> contenido = data['content'];
-
-      // ✅ Convertimos cada elemento a un Topico
       return contenido.map((json) => Topico.fromJson(json)).toList();
+    } else if (response.statusCode == 401) {
+      throw Exception("Sesión expirada");
+    } else if (response.statusCode == 403) {
+      throw Exception("Sin permisos");
     } else {
-      throw Exception("Error: ${response.statusCode} - ${response.body}");
+      throw Exception("Error al cargar tópicos");
     }
   }
 }
