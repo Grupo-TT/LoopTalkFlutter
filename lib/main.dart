@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'ui/vista_login.dart';
+import 'repository/loop_talk_service_api.dart';
+import 'repository/topico_service.dart'; // Importar TopicoService
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bloc/auth_bloc.dart'; 
+import 'bloc/topico_bloc.dart'; // Importar TopicoBloc
 
 Future<void> main() async {
-  // Cargar variables de entorno desde .env
-  await dotenv.load(fileName: ".env");
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  
+  final authService = LoopTalkServiceApi();
+  final topicoService = TopicoService();
 
-  runApp(const LoopTalkApp());
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => AuthBloc(authService),
+        ),
+        BlocProvider(
+          create: (_) => TopicoBloc(topicoService),
+        ),
+      ],
+      child: const LoopTalkApp(),
+    ),
+  );
+  
+  FlutterNativeSplash.remove();
 }
 
 class LoopTalkApp extends StatelessWidget {
@@ -23,3 +45,4 @@ class LoopTalkApp extends StatelessWidget {
     
   }
 }
+

@@ -15,13 +15,52 @@ dependencies:
   flutter_bloc: ^9.1.1
   http: ^1.5.0
   flutter_dotenv: ^6.0.0
+  equatable: ^2.0.5
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
+
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  
+  # Configuración para Android adaptive icons
+  adaptive_icon_background: "#7C3AED"  # Color púrpura de tu app
+  adaptive_icon_foreground: "assets/icon.png"  # Usar el mismo icono
+  
+  remove_alpha_ios: true  # Elimina transparencia en iOS si es necesario
+  
+flutter_native_splash:
+  # Color de fondo de la pantalla de carga (púrpura de tu app)
+  color: "#7C3AED"
+  
+  # Imagen/logo que se mostrará en el centro
+  image: assets/icon.png
+  
+  # Color del icono de carga de Android 12+
+  color_dark: "#7C3AED"
+  image_dark: assets/icon.png
+  
+  # Plataformas donde aplicar el splash screen
+  android: true
+  ios: true
+  web: true
+  
+  # Configuración para Android 12+
+  android_12:
+    image: assets/icon.png
+    color: "#7C3AED"
+    icon_background_color: "#7C3AED"
+  
 flutter:
 
   uses-material-design: true
