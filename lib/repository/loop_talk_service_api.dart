@@ -7,7 +7,6 @@ import '../../utils/token_storage.dart';
 
 
 class LoopTalkServiceApi {
-  // final String baseUrl = 'http://18.222.231.135:8080';
   final String baseUrl = dotenv.env['API_URL']!;
   Future<String> login(String correo, String contrasenia) async {
     final url = Uri.parse("$baseUrl/login");

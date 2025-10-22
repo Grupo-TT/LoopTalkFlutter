@@ -1,11 +1,13 @@
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import '../../model/topico.dart';
 import '../../utils/token_storage.dart';
 
 
 class TopicoService {
-  final String baseUrl = 'http://18.222.231.135:8080';
+    final String baseUrl = dotenv.env['API_URL']!;
+
 
   Future<List<Topico>> obtenerTopicos() async {
     final url = Uri.parse("$baseUrl/topico");
