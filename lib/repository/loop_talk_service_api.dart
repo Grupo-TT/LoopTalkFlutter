@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../../model/usuario.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,8 +7,8 @@ import '../../utils/token_storage.dart';
 
 
 class LoopTalkServiceApi {
-  final String baseUrl = 'http://18.222.231.135:8080';
-
+  // final String baseUrl = 'http://18.222.231.135:8080';
+  final String baseUrl = dotenv.env['API_URL']!;
   Future<String> login(String correo, String contrasenia) async {
     final url = Uri.parse("$baseUrl/login");
 

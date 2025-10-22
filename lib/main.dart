@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'ui/vista_login.dart';
 import 'repository/loop_talk_service_api.dart';
 import 'repository/topico_service.dart'; // Importar TopicoService
@@ -8,6 +9,7 @@ import 'bloc/auth_bloc.dart';
 import 'bloc/topico_bloc.dart'; // Importar TopicoBloc
 
 Future<void> main() async {
+  await dotenv.load(fileName: "assets/.env");
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   
