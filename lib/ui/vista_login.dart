@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/auth_bloc.dart';
-import '../../bloc/auth_event.dart';
-import '../../bloc/auth_state.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 import 'vista_recuperar.dart';
 import 'vista_registrar.dart';
-import 'vista_topicos.dart';
+import 'main_navigation.dart';
 
 bool _obscurePasswordLogin = true;
 
@@ -50,7 +50,7 @@ class _VistaLoginState extends State<VistaLogin> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const VistaTopicos(),
+                  builder: (context) => const MainNavigation(),
                 ),
               );
             }

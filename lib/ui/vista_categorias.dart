@@ -23,10 +23,10 @@ class _VistaCategoriasState extends State<VistaCategorias> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categorías', style: TextStyle(color: Colors.white)),
+        title: const Text('Categorías', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.deepPurple,
-        // Asegura que la flecha de volver sea blanca
-        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        automaticallyImplyLeading: false,
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurple,
