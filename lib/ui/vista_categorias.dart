@@ -23,17 +23,21 @@ class _VistaCategoriasState extends State<VistaCategorias> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categorías', style: TextStyle(color: Colors.white)),
+        title: const Text('Categorías', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.deepPurple,
-        // Asegura que la flecha de volver sea blanca
-        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        automaticallyImplyLeading: false,
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () => _openCreateDialog(context),
-      ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 70.0), // 💜 lo sube para que no se tape
+          child: FloatingActionButton(
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => _openCreateDialog(context),
+    ),
+  ),
       body: BlocListener<CategoriaBloc, CategoriaState>(
         listener: (context, state) {
           if (state is CategoriaOperationSuccess) {

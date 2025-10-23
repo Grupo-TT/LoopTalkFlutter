@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../../model/usuario.dart';
+import '../../model/rol.dart';
 
 
 class LoopTalkServiceApi {
   final String baseUrl = dotenv.env['API_URL']!;
+  
   Future<String> login(String correo, String contrasenia) async {
     final url = Uri.parse("$baseUrl/login");
 
@@ -59,4 +61,53 @@ class LoopTalkServiceApi {
       throw Exception("Error en registro: ${response.statusCode}");
     }
   }
+
+  Future<Usuario> obtenerUsuarioPorId(int id, String token) async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/usuario/$id'),
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+  );
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return Usuario.fromJson(data);
+  } else {
+    throw Exception('Error al obtener el usuario');
+  }
+}
+Future<Usuario> actualizarUsuario({
+  required int id,
+  required String nombre,
+  required String correo,
+  required String contrasenia,
+  required Rol rol,
+  required String token,
+}) async {
+  final url = Uri.parse('$baseUrl/usuario/$id');
+
+  final response = await http.put(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $token",
+    },
+    body: jsonEncode({
+      "id": id,
+      "nombre": nombre,
+      "correoElectronico": correo,
+      "contrasenia": contrasenia,
+      "rol": rol.name.toUpperCase(),
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return Usuario.fromJson(data);
+  } else {
+    throw Exception("Error al actualizar usuario: ${response.statusCode}");
+  }
+}
+
 }

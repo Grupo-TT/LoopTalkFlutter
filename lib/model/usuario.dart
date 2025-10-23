@@ -1,4 +1,5 @@
 import 'package:loop_talk/model/rol.dart';
+
 class Usuario {
   final int id;
   final String nombre;
@@ -11,33 +12,46 @@ class Usuario {
     required this.nombre,
     required this.correoElectronico,
     required this.rol,
-    this.password
+    this.password,
   });
 
-  /// Crear un Usuario desde JSON
   factory Usuario.fromJson(Map<String, dynamic> json) {
     return Usuario(
-      id: json['id'],
-      nombre: json['nombre'],
-      correoElectronico: json['correoElectronico'],
-      rol: json['rol'],
+      id: json['id'] ?? 0,
+      nombre: json['nombre'] ?? json['username'] ?? 'Usuario',
+      correoElectronico: json['correoElectronico'] ?? json['email'] ?? '',
+      rol: _parseRol(json['rol']),
     );
   }
 
-  /// Convertir Usuario a JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'nombre': nombre,
       'correoElectronico': correoElectronico,
-      'rol': rol,
+      'rol': rol.name,
     };
   }
 
   Map<String, dynamic> toJsonLogin() {
     return {
       'correoElectronico': correoElectronico.toLowerCase(),
-      'contrasenia': password
+      'contrasenia': password,
     };
+  }
+
+  static Rol _parseRol(dynamic value) {
+    if (value is Rol) return value;
+    if (value is String) {
+      try {
+        return Rol.values.firstWhere(
+          (r) => r.name.toUpperCase() == value.toUpperCase(),
+          orElse: () => Rol.estudiante,
+        );
+      } catch (_) {
+        return Rol.estudiante;
+      }
+    }
+    return Rol.estudiante;
   }
 }

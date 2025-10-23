@@ -23,7 +23,7 @@ class _VistaRecuperarState extends State<VistaRecuperar> {
               Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.purple, size: 32),
+                  icon: const Icon(Icons.arrow_back, color: Colors.deepPurple, size: 32),
                   onPressed: () {
                     Navigator.pop(context); // Vuelve a la vista login
                   },
@@ -37,7 +37,7 @@ class _VistaRecuperarState extends State<VistaRecuperar> {
                 height: alto * 0.25,
                 child: Center(
                   child: Image.asset(
-                    "assets/logo.png",
+                    "assets/icon.png",
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -86,7 +86,7 @@ class _VistaRecuperarState extends State<VistaRecuperar> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
+                    backgroundColor: Colors.deepPurple,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

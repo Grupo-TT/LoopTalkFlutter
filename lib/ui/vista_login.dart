@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/auth_bloc.dart';
-import '../../bloc/auth_event.dart';
-import '../../bloc/auth_state.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 import 'vista_recuperar.dart';
 import 'vista_registrar.dart';
-import 'vista_topicos.dart';
+import 'main_navigation.dart';
 
 bool _obscurePasswordLogin = true;
 
@@ -50,7 +50,7 @@ class _VistaLoginState extends State<VistaLogin> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const VistaTopicos(),
+                  builder: (context) => const MainNavigation(),
                 ),
               );
             }
@@ -84,7 +84,7 @@ class _VistaLoginState extends State<VistaLogin> {
                     height: alto * 0.25,
                     child: Center(
                       child: Image.asset(
-                        "assets/logo.png",
+                        "assets/icon.png",
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -177,7 +177,7 @@ class _VistaLoginState extends State<VistaLogin> {
                         ? const Center(child: CircularProgressIndicator())
                         : ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
+                              backgroundColor: Colors.deepPurple,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

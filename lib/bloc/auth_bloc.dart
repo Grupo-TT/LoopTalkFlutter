@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../repository/loop_talk_service_api.dart';
 import '../../model/usuario.dart';
 import '../../utils/token_storage.dart';
-import 'package:loop_talk/model/rol.dart';
 
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -17,12 +17,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final token = await authService.login(event.correo, event.contrasenia);
         await TokenStorage.saveToken(token);
 
-        final usuario = Usuario(
-          id: 0,
-          nombre: "Usuario",
-          correoElectronico: event.correo,
-          rol: Rol.estudiante,
-        );
+        final decoded = JwtDecoder.decode(token);
+        final userId = decoded['id'];
+        final usuario = await authService.obtenerUsuarioPorId(userId, token);
 
         emit(AuthSuccess(usuario));
       } catch (e) {
@@ -48,6 +45,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutEvent>((event, emit) async {
       await TokenStorage.deleteToken();
       emit(AuthInitial());
+    });
+
+    on<UpdateProfileEvent>((event, emit) async {
+      final currentState = state;
+      if (currentState is AuthSuccess) {
+        final usuarioActual = currentState.usuario;
+
+        final usuarioActualizado = Usuario(
+          id: usuarioActual.id,
+          nombre: event.nombre,
+          correoElectronico: event.correoElectronico,
+          rol: usuarioActual.rol,
+          password: usuarioActual.password,
+        );
+
+        emit(AuthSuccess(usuarioActualizado));
+      }
     });
   }
 }
