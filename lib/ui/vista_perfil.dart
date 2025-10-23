@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 import 'vista_login.dart';
 import 'vista_editar_perfil.dart';
 
@@ -53,35 +54,70 @@ class VistaPerfil extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header con avatar y nombre
-              _buildProfileHeader(),
-              const SizedBox(height: 24),
-              
-              // Estadísticas
-              _buildStatsSection(),
-              const SizedBox(height: 32),
-              
-              // Sección General
-              _buildSectionTitle('General'),
-              const SizedBox(height: 12),
-              _buildGeneralSection(context),
-              const SizedBox(height: 32),
-              
-              // Sección Sesión
-              _buildSectionTitle('Sesión'),
-              const SizedBox(height: 12),
-              _buildSessionSection(context),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
+      body: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state is AuthSuccess) {
+            final usuario = state.usuario;
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black, width: 2),
+                          ),
+                          child: const Icon(Icons.person, size: 40, color: Colors.black),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          usuario.nombre,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          usuario.correoElectronico,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFFB8860B),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildStatsSection(),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('General'),
+                  const SizedBox(height: 12),
+                  _buildGeneralSection(context),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('Sesión'),
+                  const SizedBox(height: 12),
+                  _buildSessionSection(context),
+                ],
+              ),
+            );
+          } else if (state is AuthLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            return const Center(child: Text("No hay usuario autenticado"));
+          }
+        },
       ),
+
     );
   }
 
@@ -124,52 +160,52 @@ class VistaPerfil extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader() {
-    return Center(
-      child: Column(
-        children: [
-          // Avatar
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.black, width: 2),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.person,
-                size: 40,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
+  // Widget _buildProfileHeader() {
+  //   return Center(
+  //     child: Column(
+  //       children: [
+  //         // Avatar
+  //         Container(
+  //           width: 80,
+  //           height: 80,
+  //           decoration: BoxDecoration(
+  //             shape: BoxShape.circle,
+  //             border: Border.all(color: Colors.black, width: 2),
+  //           ),
+  //           child: const Center(
+  //             child: Icon(
+  //               Icons.person,
+  //               size: 40,
+  //               color: Colors.black,
+  //             ),
+  //           ),
+  //         ),
+  //         const SizedBox(height: 12),
           
-          // Nombre
-          const Text(
-            'Miguel_Andres',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
+  //         // Nombre
+  //         const Text(
+  //           'Miguel_Andres',
+  //           style: TextStyle(
+  //             fontSize: 18,
+  //             fontWeight: FontWeight.w600,
+  //             color: Colors.black,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 4),
           
-          // Email
-          const Text(
-            'correoplaceholder@gmail.com',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFFB8860B),
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //         // Email
+  //         const Text(
+  //           'correoplaceholder@gmail.com',
+  //           style: TextStyle(
+  //             fontSize: 14,
+  //             color: Color(0xFFB8860B),
+  //             fontWeight: FontWeight.w400,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildStatsSection() {
     return Row(

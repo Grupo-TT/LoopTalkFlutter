@@ -84,7 +84,7 @@ class _VistaLoginState extends State<VistaLogin> {
                     height: alto * 0.25,
                     child: Center(
                       child: Image.asset(
-                        "assets/logo.png",
+                        "assets/icon.png",
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -177,7 +177,7 @@ class _VistaLoginState extends State<VistaLogin> {
                         ? const Center(child: CircularProgressIndicator())
                         : ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
+                              backgroundColor: Colors.deepPurple,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

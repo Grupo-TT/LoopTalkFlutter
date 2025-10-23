@@ -83,7 +83,7 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
                   Align(
                     alignment: Alignment.topLeft,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.purple, size: 32),
+                      icon: const Icon(Icons.arrow_back, color: Colors.deepPurple, size: 32),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -94,7 +94,7 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
                   SizedBox(
                     height: alto * 0.25,
                     child: Center(
-                      child: Image.asset("assets/logo.png", fit: BoxFit.contain),
+                      child: Image.asset("assets/icon.png", fit: BoxFit.contain),
                     ),
                   ),
 
@@ -191,7 +191,7 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
                         ? const Center(child: CircularProgressIndicator())
                         : ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
+                              backgroundColor: Colors.deepPurple,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: () => _registrar(context),
@@ -209,7 +209,7 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
                         onPressed: () => Navigator.pop(context),
                         child: const Text(
                           "Inicia sesión",
-                          style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],

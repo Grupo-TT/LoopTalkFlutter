@@ -28,12 +28,16 @@ class _VistaCategoriasState extends State<VistaCategorias> {
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () => _openCreateDialog(context),
-      ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 70.0), // 💜 lo sube para que no se tape
+          child: FloatingActionButton(
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white,
+            child: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => _openCreateDialog(context),
+    ),
+  ),
       body: BlocListener<CategoriaBloc, CategoriaState>(
         listener: (context, state) {
           if (state is CategoriaOperationSuccess) {
