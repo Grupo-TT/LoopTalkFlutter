@@ -6,7 +6,10 @@ import '../../bloc/topico_state.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
+import '../../bloc/categoria_bloc.dart';
+import '../../repository/categoria_service.dart';
 import 'vista_login.dart';
+import 'vista_categorias.dart';
 
 class VistaTopicos extends StatefulWidget {
   const VistaTopicos({super.key});
@@ -75,6 +78,22 @@ class _VistaTopicosState extends State<VistaTopicos> {
                     fontSize: 24,
                   ),
                 ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.category),
+                title: const Text('Categorías'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BlocProvider(
+                        create: (_) => CategoriaBloc(CategoriaService()),
+                        child: const VistaCategorias(),
+                      ),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.logout),
