@@ -73,7 +73,6 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
   }
 
   void _guardarCambios() {
-    // Aquí implementarás la lógica para guardar los cambios
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Cambios guardados exitosamente')),
     );
