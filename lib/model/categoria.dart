@@ -8,15 +8,15 @@ class Categoria {
   factory Categoria.fromJson(Map<String, dynamic> json){
     return Categoria(
       id: json['id'] as int?,
-      nombre: json['categoria'] as String,
-      descripcion: json['nombre'] as String,
+      nombre: json['nombre'] as String,
+      descripcion: json['categoria'] as String,
     );
   }
 
   Map<String, dynamic> toJsonCreate(){
     return {
       'nombre': nombre,
-      'categoria': descripcion
+      'categoria': descripcion,
     };
   }
 
@@ -24,7 +24,7 @@ class Categoria {
     return {
       'id': id,
       'nombre': nombre,
-      'categoria': descripcion
+      'categoria': descripcion,
     };
   }
 
