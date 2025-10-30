@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loop_talk/components/snackbar_helper.dart';
 import 'dart:io';
+
+import 'package:permission_handler/permission_handler.dart';
 
 class VistaEditarPerfil extends StatefulWidget {
   const VistaEditarPerfil({super.key});
@@ -22,7 +25,54 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
     super.dispose();
   }
 
-  Future<void> _seleccionarImagen() async {
+  // --- NUEVA FUNCIÓN #1: Solo se encarga de pedir el permiso ---
+  // Devuelve 'true' si el permiso se concede, 'false' en caso contrario.
+  Future<bool> _solicitarPermiso(ImageSource source) async {
+    
+    final permission = source == ImageSource.camera ? Permission.camera : Permission.photos;
+    final sourceText = source == ImageSource.camera ? 'cámara' : 'galería';
+
+    final status = await permission.request();
+
+    if (!mounted) return false;
+
+    if (status.isGranted) {
+      return true;
+    } 
+    
+    if (status.isDenied) {
+      
+        SnackBarHelper.showInfoMessage(context, 'Permiso denegado para acceder a la $sourceText.');
+      
+    }else if (status.isPermanentlyDenied) {
+    SnackBarHelper.showActionMessage(
+      context,
+      'El permiso para la $sourceText está denegado permanentemente.',
+      actionLabel: 'Ajustes',
+      onActionPressed: () => openAppSettings(),
+    );
+  }
+
+  return false;
+}
+
+  // --- NUEVA FUNCIÓN #2: Solo se encarga de abrir el selector de imagen ---
+  Future<void> _abrirSelectorImagen(ImageSource source) async {
+    final XFile? imagen = await _picker.pickImage(
+      source: source,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 75,
+    );
+    if (imagen != null) {
+      setState(() {
+        _imagenSeleccionada = imagen;
+      });
+    }
+  }
+
+  // Esta función ahora orquesta el flujo
+  void _mostrarOpcionesImagen() {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -34,16 +84,11 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                 title: const Text('Galería'),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  final XFile? imagen = await _picker.pickImage(
-                    source: ImageSource.gallery,
-                    maxWidth: 512,
-                    maxHeight: 512,
-                    imageQuality: 75,
-                  );
-                  if (imagen != null) {
-                    setState(() {
-                      _imagenSeleccionada = imagen;
-                    });
+                  // 1. Pide permiso
+                  final bool tienePermiso = await _solicitarPermiso(ImageSource.gallery);
+                  // 2. Si lo tiene, abre la galería
+                  if (tienePermiso) {
+                    _abrirSelectorImagen(ImageSource.gallery);
                   }
                 },
               ),
@@ -52,16 +97,11 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                 title: const Text('Cámara'),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  final XFile? imagen = await _picker.pickImage(
-                    source: ImageSource.camera,
-                    maxWidth: 512,
-                    maxHeight: 512,
-                    imageQuality: 75,
-                  );
-                  if (imagen != null) {
-                    setState(() {
-                      _imagenSeleccionada = imagen;
-                    });
+                  // 1. Pide permiso
+                  final bool tienePermiso = await _solicitarPermiso(ImageSource.camera);
+                  // 2. Si lo tiene, abre la cámara
+                  if (tienePermiso) {
+                    _abrirSelectorImagen(ImageSource.camera);
                   }
                 },
               ),
@@ -133,8 +173,6 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              
-              // Avatar con botón de cámara
               Center(
                 child: Stack(
                   children: [
@@ -166,7 +204,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                       bottom: 0,
                       right: 0,
                       child: GestureDetector(
-                        onTap: _seleccionarImagen,
+                        onTap: _mostrarOpcionesImagen,
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
@@ -185,10 +223,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                   ],
                 ),
               ),
-              
               const SizedBox(height: 40),
-              
-              // Campo Nombre Completo
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -222,10 +257,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                   ),
                 ],
               ),
-              
               const SizedBox(height: 24),
-              
-              // Campo Email
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
