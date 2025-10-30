@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loop_talk/components/snackbar_helper.dart';
 import '../bloc/categoria_bloc.dart';
 import '../bloc/categoria_event.dart';
 import '../bloc/categoria_state.dart';
@@ -158,9 +159,7 @@ class _VistaCategoriasState extends State<VistaCategorias> {
                 final nombre = _nombreController.text.trim();
                 final descripcion = _descripcionController.text.trim();
                 if (nombre.isEmpty || descripcion.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Por favor completa todos los campos')),
-                  );
+                  SnackBarHelper.showErrorMessage(context, "Por favor, completa todos los campos");
                   return;
                 }
 
@@ -170,9 +169,7 @@ class _VistaCategoriasState extends State<VistaCategorias> {
 
                 Navigator.of(context).pop();
                 // Opcional: mostrar feedback rápido
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Creando categoría...')),
-                );
+               SnackBarHelper.showSuccesssMessage(context, 'Categoria creada exitosamente');
               },
               child: const Text('Crear', style: TextStyle(color: Colors.white)),
             ),
@@ -231,9 +228,7 @@ class _VistaCategoriasState extends State<VistaCategorias> {
                 categoriaBloc.add(UpdateCategoria(updated));
 
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Actualizando categoría...')),
-                );
+                SnackBarHelper.showSuccesssMessage(context, 'Categoria actualizada exitosamente');
               },
               child: const Text('Guardar', style: TextStyle(color: Colors.white)),
             ),
