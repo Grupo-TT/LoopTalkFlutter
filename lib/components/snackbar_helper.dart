@@ -13,7 +13,7 @@
           shape: RoundedRectangleBorder(
              borderRadius: BorderRadius.circular(12),
           ),
-          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
          ),
        );
      }

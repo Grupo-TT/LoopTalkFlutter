@@ -37,12 +37,12 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
     final confirmContrasenia = _confirmContraseniaController.text.trim();
 
     if (nombre.isEmpty || correo.isEmpty || contrasenia.isEmpty || confirmContrasenia.isEmpty) {
-        SnackBarHelper.showErrorMessage(context, "Por favor completa todos los campos");
+      SnackBarHelper.showErrorMessage(context, "Por favor, completa todos los campos");
       return;
     }
 
     if (contrasenia != confirmContrasenia) {
-        SnackBarHelper.showErrorMessage(context, "Las contraseñas no coinciden");
+      SnackBarHelper.showErrorMessage(context, "Las contraseñas no coinciden");
       return;
     }
 
@@ -59,11 +59,15 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            
-            SnackBarHelper.showSuccesssMessage(context, "Usuario ${state.usuario.nombre} registrado con éxito");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Usuario ${state.usuario.nombre} registrado con éxito")),
+            );
             Navigator.pop(context); // volver al login
           } else if (state is AuthFailure) {
-            SnackBarHelper.showErrorMessage(context, state.error);
+            ScaffoldMessenger.of(context).showSnackBar(
+             
+              SnackBar(content: Text(state.error),),
+            );
           }
         },
         builder: (context, state) {
