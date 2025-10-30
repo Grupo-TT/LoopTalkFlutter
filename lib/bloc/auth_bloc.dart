@@ -23,7 +23,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         emit(AuthSuccess(usuario));
       } catch (e) {
-        emit(AuthFailure(e.toString()));
+        final message = e.toString().replaceFirst('Exception:', '');
+        emit(AuthFailure(message));
       }
     });
 
@@ -38,7 +39,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         emit(AuthSuccess(usuario));
       } catch (e) {
-        emit(AuthFailure(e.toString()));
+        final message = e.toString().replaceFirst('Exception:', '');
+        emit(AuthFailure(message));
       }
     });
 
