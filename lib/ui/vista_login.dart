@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loop_talk/components/snackbar_helper.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -55,9 +56,7 @@ class _VistaLoginState extends State<VistaLogin> {
               );
             }
           } else if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error)),
-            );
+            SnackBarHelper.showErrorMessage(context, state.error);
           }
         },
         builder: (context, state) {
