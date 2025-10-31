@@ -30,10 +30,7 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       extendBody: true,
       bottomNavigationBar: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -42,7 +39,7 @@ class _MainNavigationState extends State<MainNavigation> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 5),
             ),
@@ -106,12 +103,8 @@ class _MainNavigationState extends State<MainNavigation> {
   }) {
     final isActive = _currentIndex == index;
     return BottomNavigationBarItem(
-      icon: Icon(
-        isActive ? activeIcon : icon,
-        size: 28,
-      ),
+      icon: Icon(isActive ? activeIcon : icon, size: 28),
       label: label,
     );
   }
 }
-

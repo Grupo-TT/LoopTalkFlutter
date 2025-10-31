@@ -5,7 +5,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
 class VistaEditarPerfil extends StatefulWidget {
-  const VistaEditarPerfil({Key? key}) : super(key: key);
+  const VistaEditarPerfil({super.key});
 
   @override
   State<VistaEditarPerfil> createState() => _VistaEditarPerfilState();
@@ -21,7 +21,9 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
     final state = context.read<AuthBloc>().state;
     if (state is AuthSuccess) {
       _nombreController = TextEditingController(text: state.usuario.nombre);
-      _correoController = TextEditingController(text: state.usuario.correoElectronico);
+      _correoController = TextEditingController(
+        text: state.usuario.correoElectronico,
+      );
     } else {
       _nombreController = TextEditingController();
       _correoController = TextEditingController();
@@ -47,15 +49,15 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
     }
 
     if (!correo.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Correo inválido")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Correo inválido")));
       return;
     }
 
     context.read<AuthBloc>().add(
-          UpdateProfileEvent(nombre: nombre, correoElectronico: correo),
-        );
+      UpdateProfileEvent(nombre: nombre, correoElectronico: correo),
+    );
   }
 
   Future<void> _confirmarSalir() async {
@@ -77,6 +79,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
       ),
     );
 
+    if (!mounted) return;
     if (salir == true) Navigator.pop(context);
   }
 
@@ -90,9 +93,9 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
           );
           Navigator.pop(context);
         } else if (state is AuthFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
         }
       },
       builder: (context, state) {
@@ -109,7 +112,10 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
             ),
             title: const Text(
               'Editar perfil',
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             centerTitle: true,
             actions: [
@@ -132,7 +138,11 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                       shape: BoxShape.circle,
                       color: Colors.black12,
                     ),
-                    child: const Icon(Icons.person, size: 50, color: Colors.black),
+                    child: const Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -141,7 +151,10 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                   decoration: InputDecoration(
                     labelText: 'Nombre',
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+                      borderSide: BorderSide(
+                        color: Colors.grey[300]!,
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: const OutlineInputBorder(
@@ -156,7 +169,10 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                   decoration: InputDecoration(
                     labelText: 'Correo electrónico',
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+                      borderSide: BorderSide(
+                        color: Colors.grey[300]!,
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: const OutlineInputBorder(
@@ -166,7 +182,9 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                 ),
                 const SizedBox(height: 30),
                 if (isLoading)
-                  const Center(child: CircularProgressIndicator(color: Colors.black)),
+                  const Center(
+                    child: CircularProgressIndicator(color: Colors.black),
+                  ),
               ],
             ),
           ),

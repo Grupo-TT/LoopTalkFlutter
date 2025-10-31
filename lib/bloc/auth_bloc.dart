@@ -5,7 +5,6 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../repository/loop_talk_service_api.dart';
 import '../../utils/token_storage.dart';
 
-
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoopTalkServiceApi authService;
 
@@ -49,29 +48,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<UpdateProfileEvent>((event, emit) async {
-  final currentState = state;
-  if (currentState is AuthSuccess) {
-    emit(AuthLoading());
-    try {
-      final usuarioActual = currentState.usuario;
-      final token = await TokenStorage.getToken();
+      final currentState = state;
+      if (currentState is AuthSuccess) {
+        emit(AuthLoading());
+        try {
+          final usuarioActual = currentState.usuario;
+          final token = await TokenStorage.getToken();
 
-      if (token == null) throw Exception("Token no encontrado");
+          if (token == null) throw Exception("Token no encontrado");
 
-      // Llamada al endpoint PUT
-      final usuarioActualizado = await authService.actualizarUsuario(
-        id: usuarioActual.id!,
-        nombre: event.nombre,
-        correo: event.correoElectronico,
-        token: token,
-      );
+          // Llamada al endpoint PUT
+          final usuarioActualizado = await authService.actualizarUsuario(
+            id: usuarioActual.id,
+            nombre: event.nombre,
+            correo: event.correoElectronico,
+            token: token,
+          );
 
-      emit(AuthSuccess(usuarioActualizado));
-    } catch (e) {
-      emit(AuthFailure("Error al actualizar el perfil: $e"));
-    }
-  }
-});
-
+          emit(AuthSuccess(usuarioActualizado));
+        } catch (e) {
+          emit(AuthFailure("Error al actualizar el perfil: $e"));
+        }
+      }
+    });
   }
 }
