@@ -8,7 +8,7 @@ import 'vista_editar_perfil.dart';
 
 class VistaPerfil extends StatelessWidget {
   final VoidCallback? onNavigateToHome;
-  
+
   const VistaPerfil({super.key, this.onNavigateToHome});
 
   @override
@@ -16,53 +16,21 @@ class VistaPerfil extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
         }
       },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-          leadingWidth: 70,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!, width: 1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
-                    onPressed: () {
-                      if (onNavigateToHome != null) {
-                        onNavigateToHome!();
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ),
-              ),
-            ),
-          ),
           title: const Text(
-            'Perfil',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+            'Mi Perfil',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
+          backgroundColor: Colors.deepPurple,
+          elevation: 0,
+          automaticallyImplyLeading: false,
         ),
         body: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
@@ -84,7 +52,11 @@ class VistaPerfil extends StatelessWidget {
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.black, width: 2),
                             ),
-                            child: const Icon(Icons.person, size: 40, color: Colors.black),
+                            child: const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: Colors.black,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -157,7 +129,10 @@ class VistaPerfil extends StatelessWidget {
                   (route) => false,
                 );
               },
-              child: const Text('Cerrar sesión', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Cerrar sesión',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -260,13 +235,15 @@ class VistaPerfil extends StatelessWidget {
             onTap: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const VistaEditarPerfil()),
+                MaterialPageRoute(
+                  builder: (context) => const VistaEditarPerfil(),
+                ),
               );
 
               // 🔄 Cuando regresa de editar, se reconstruye automáticamente
               context.read<AuthBloc>().emit(
-                    (context.read<AuthBloc>().state as AuthSuccess),
-                  );
+                (context.read<AuthBloc>().state as AuthSuccess),
+              );
             },
             showDivider: true,
           ),
@@ -354,18 +331,17 @@ class VistaPerfil extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Colors.grey[400],
+                ),
               ],
             ),
           ),
         ),
         if (showDivider)
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: Colors.grey[300],
-            indent: 56,
-          ),
+          Divider(height: 1, thickness: 1, color: Colors.grey[300], indent: 56),
       ],
     );
   }
