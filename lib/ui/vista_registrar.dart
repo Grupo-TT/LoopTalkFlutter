@@ -58,9 +58,9 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is AuthRegistered) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Usuario ${state.usuario.nombre} registrado con éxito")),
+              SnackBar(content: Text("Usuario registrado con éxito")),
             );
             Navigator.pop(context); // volver al login
           } else if (state is AuthFailure) {

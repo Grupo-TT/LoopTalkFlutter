@@ -10,6 +10,8 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
+class AuthRegistered extends AuthState {}
+
 class AuthSuccess extends AuthState {
   final Usuario usuario;
   AuthSuccess(this.usuario);

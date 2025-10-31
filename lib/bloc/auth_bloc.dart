@@ -29,16 +29,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RegisterEvent>((event, emit) async {
       emit(AuthLoading());
       try {
-        final usuario = await authService.registrarUsuario(
+        await authService.registrarUsuario(
           nombre: event.nombre,
           correo: event.correo,
           contrasenia: event.contrasenia,
         );
 
-        emit(AuthSuccess(usuario));
+        // Login automático luego del registro
+        final token = await authService.login(event.correo, event.contrasenia);
+        await TokenStorage.saveToken(token);
+
+        final decoded = JwtDecoder.decode(token);
+        final userId = decoded['id'];
+        final usuario = await authService.obtenerUsuarioPorId(userId, token);
+
+        emit(AuthSuccess(usuario)); // Rediriges al home o donde necesites
       } catch (e) {
-        final message = e.toString().replaceFirst('Exception:', '');
-        emit(AuthFailure(message));
+        emit(AuthFailure(e.toString()));
       }
     });
 
