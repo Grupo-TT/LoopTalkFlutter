@@ -104,23 +104,23 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.deepPurple,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
               onPressed: _confirmarSalir,
             ),
             title: const Text(
               'Editar perfil',
               style: TextStyle(
-                color: Colors.black,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
             centerTitle: true,
             actions: [
               IconButton(
-                icon: const Icon(Icons.check, color: Colors.black),
+                icon: const Icon(Icons.check, color: Colors.white),
                 onPressed: isLoading ? null : _guardarCambios,
               ),
             ],
