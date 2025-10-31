@@ -4,7 +4,7 @@ class Usuario {
   final int id;
   final String nombre;
   final String correoElectronico;
-  final String? password;
+  final String? contrasenia;
   final Rol rol;
 
   Usuario({
@@ -12,7 +12,7 @@ class Usuario {
     required this.nombre,
     required this.correoElectronico,
     required this.rol,
-    this.password,
+    this.contrasenia,
   });
 
   factory Usuario.fromJson(Map<String, dynamic> json) {
@@ -36,7 +36,7 @@ class Usuario {
   Map<String, dynamic> toJsonLogin() {
     return {
       'correoElectronico': correoElectronico.toLowerCase(),
-      'contrasenia': password,
+      'contrasenia': contrasenia,
     };
   }
 

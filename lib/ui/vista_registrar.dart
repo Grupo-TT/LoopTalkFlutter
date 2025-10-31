@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loop_talk/components/snackbar_helper.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
@@ -36,16 +37,12 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
     final confirmContrasenia = _confirmContraseniaController.text.trim();
 
     if (nombre.isEmpty || correo.isEmpty || contrasenia.isEmpty || confirmContrasenia.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Por favor completa todos los campos")),
-      );
+      SnackBarHelper.showErrorMessage(context, "Por favor, completa todos los campos");
       return;
     }
 
     if (contrasenia != confirmContrasenia) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Las contraseñas no coinciden")),
-      );
+      SnackBarHelper.showErrorMessage(context, "Las contraseñas no coinciden");
       return;
     }
 
@@ -61,14 +58,15 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
+          if (state is AuthRegistered) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Usuario ${state.usuario.nombre} registrado con éxito")),
+              SnackBar(content: Text("Usuario registrado con éxito")),
             );
             Navigator.pop(context); // volver al login
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error)),
+             
+              SnackBar(content: Text(state.error),),
             );
           }
         },
