@@ -25,8 +25,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
     super.dispose();
   }
 
-  // --- NUEVA FUNCIÓN #1: Solo se encarga de pedir el permiso ---
-  // Devuelve 'true' si el permiso se concede, 'false' en caso contrario.
+  
   Future<bool> _solicitarPermiso(ImageSource source) async {
     
     final permission = source == ImageSource.camera ? Permission.camera : Permission.photos;
@@ -56,7 +55,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
   return false;
 }
 
-  // --- NUEVA FUNCIÓN #2: Solo se encarga de abrir el selector de imagen ---
+  
   Future<void> _abrirSelectorImagen(ImageSource source) async {
     final XFile? imagen = await _picker.pickImage(
       source: source,
@@ -71,7 +70,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
     }
   }
 
-  // Esta función ahora orquesta el flujo
+  
   void _mostrarOpcionesImagen() {
     showModalBottomSheet(
       context: context,
@@ -84,9 +83,9 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                 title: const Text('Galería'),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  // 1. Pide permiso
+                  
                   final bool tienePermiso = await _solicitarPermiso(ImageSource.gallery);
-                  // 2. Si lo tiene, abre la galería
+                  
                   if (tienePermiso) {
                     _abrirSelectorImagen(ImageSource.gallery);
                   }
@@ -97,9 +96,9 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                 title: const Text('Cámara'),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  // 1. Pide permiso
+                  
                   final bool tienePermiso = await _solicitarPermiso(ImageSource.camera);
-                  // 2. Si lo tiene, abre la cámara
+                  
                   if (tienePermiso) {
                     _abrirSelectorImagen(ImageSource.camera);
                   }
