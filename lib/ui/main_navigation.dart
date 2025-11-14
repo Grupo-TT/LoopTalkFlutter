@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loop_talk/bloc/topico_bloc.dart';
+import 'package:loop_talk/bloc/topico_event.dart';
+import 'package:loop_talk/ui/create_topic_page.dart';
 import 'vista_inicio.dart';
 import 'vista_categorias.dart';
 import 'vista_notificaciones.dart';
@@ -21,15 +25,42 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   List<Widget> get _pages => [
-    const VistaInicio(),
-    const VistaCategorias(),
-    const VistaNotificaciones(),
-    VistaPerfil(onNavigateToHome: _onNavigateToHome),
-  ];
+        const VistaInicio(),
+        const VistaCategorias(),
+        const VistaNotificaciones(),
+        VistaPerfil(onNavigateToHome: _onNavigateToHome),
+      ];
+
+  List<String> get _pageTitles => [
+        'Inicio',
+        'Categorías',
+        'Notificaciones',
+        'Perfil',
+      ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(_pageTitles[_currentIndex], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.deepPurple,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          if (_currentIndex == 0)
+            IconButton(
+              icon: const Icon(Icons.add, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CreateTopicPage()),
+                ).then((_) {
+                  context.read<TopicoBloc>().add(LoadTopicos());
+                });
+              },
+            ),
+        ],
+      ),
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,

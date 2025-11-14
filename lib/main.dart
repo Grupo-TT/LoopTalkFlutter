@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/auth_bloc.dart'; 
 import 'bloc/topico_bloc.dart';
 import 'bloc/categoria_bloc.dart';
+import 'bloc/create_topic_bloc.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -30,6 +31,9 @@ Future<void> main() async {
         ),
         BlocProvider(
           create: (_) => CategoriaBloc(categoriaService),
+        ),
+        BlocProvider(
+          create: (_) => CreateTopicBloc(topicoService: topicoService),
         ),
       ],
       child: const LoopTalkApp(),
