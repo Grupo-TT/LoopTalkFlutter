@@ -5,6 +5,8 @@ import 'package:loop_talk/bloc/categoria_event.dart';
 import 'package:loop_talk/bloc/categoria_state.dart';
 import 'package:loop_talk/bloc/create_topic_bloc.dart';
 import 'package:loop_talk/model/categoria.dart';
+import 'package:loop_talk/bloc/topico_bloc.dart';
+import 'package:loop_talk/bloc/topico_event.dart';
 import 'package:loop_talk/ui/select_category_page.dart';
 
 class CreateTopicPage extends StatelessWidget {
@@ -22,6 +24,7 @@ class CreateTopicPage extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Tópico creado con éxito')),
             );
+            context.read<TopicoBloc>().add(LoadTopicos());
             Navigator.of(context).pop();
           } else if (state is CreateTopicFailure) {
             ScaffoldMessenger.of(context).showSnackBar(

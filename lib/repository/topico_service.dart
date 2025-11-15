@@ -10,7 +10,7 @@ class TopicoService {
 
 
   Future<List<Topico>> obtenerTopicos() async {
-    final url = Uri.parse("$baseUrl/topico");
+    final url = Uri.parse("$baseUrl/topico?size=1000");
     final token = await TokenStorage.getToken();
 
     if (token == null || token.isEmpty) {
