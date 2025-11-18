@@ -4,10 +4,14 @@ import 'package:loop_talk/bloc/categoria_bloc.dart';
 import 'package:loop_talk/bloc/categoria_event.dart';
 import 'package:loop_talk/bloc/categoria_state.dart';
 import 'package:loop_talk/bloc/create_topic_bloc.dart';
+import 'package:loop_talk/components/snackbar_helper.dart';
 import 'package:loop_talk/model/categoria.dart';
 import 'package:loop_talk/bloc/topico_bloc.dart';
 import 'package:loop_talk/bloc/topico_event.dart';
 import 'package:loop_talk/ui/select_category_page.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class CreateTopicPage extends StatelessWidget {
   const CreateTopicPage({super.key});
@@ -52,10 +56,109 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
   final _categoryController = TextEditingController();
   Categoria? _selectedCategoria;
 
+  final SpeechToText _speech = SpeechToText();
+  bool _isListening = false;
+  bool _speechEnabled = false;
+  final String _currentLocaleId = 'es-ES';
+  bool _isButtonPressed = false;
+
   @override
   void initState() {
     super.initState();
     context.read<CategoriaBloc>().add(LoadCategorias());
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    final hasPermission = await _solicitarPermisoMicrofono();
+    if (hasPermission) {
+      _speechEnabled = await _speech.initialize(
+        onError: _speechErrorListener,
+        onStatus: _speechStatusListener,
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  Future<bool> _solicitarPermisoMicrofono() async {
+    final status = await Permission.microphone.request();
+
+    if (!mounted) return false;
+
+    if (status.isGranted) {
+      return true;
+    }
+
+    if (status.isDenied) {
+      SnackBarHelper.showInfoMessage(
+        context,
+        'Permiso denegado para acceder al micrófono.',
+      );
+    } else if (status.isPermanentlyDenied) {
+      SnackBarHelper.showActionMessage(
+        context,
+        'El permiso para el micrófono está denegado permanentemente.',
+        actionLabel: 'Ajustes',
+        onActionPressed: () => openAppSettings(),
+      );
+    }
+
+    return false;
+  }
+
+  void _speechStatusListener(String status) {
+    if (mounted) {
+      setState(() {
+        _isListening = _speech.isListening;
+      });
+    }
+  }
+
+  void _speechErrorListener(SpeechRecognitionError errorNotification) {
+    if (mounted) {
+      SnackBarHelper.showErrorMessage(context, 'Error: ${errorNotification.errorMsg}');
+      setState(() {
+        _isListening = false;
+      });
+    }
+  }
+
+  void _startDictado() {
+    if (!_speechEnabled) {
+      SnackBarHelper.showInfoMessage(
+        context,
+        'El reconocimiento de voz no está disponible.',
+      );
+      return;
+    }
+    if (_isListening) return;
+
+    setState(() {
+      _isListening = true;
+    });
+
+    _speech.listen(
+      onResult: (result) {
+        if (mounted) {
+          setState(() {
+            _messageController.text = result.recognizedWords;
+            _messageController.selection = TextSelection.collapsed(
+              offset: _messageController.text.length,
+            );
+          });
+        }
+      },
+      localeId: _currentLocaleId,
+      pauseFor: const Duration(minutes: 5),
+      listenFor: const Duration(minutes: 5),
+    );
+  }
+
+  void _stopDictado() {
+    if (!_isListening) return;
+    _speech.stop();
   }
 
   @override
@@ -81,7 +184,23 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _messageController,
-              decoration: const InputDecoration(labelText: 'Mensaje'),
+              decoration: InputDecoration(
+                labelText: 'Mensaje',
+                suffixIcon: Listener(
+                  onPointerDown: (_) {
+                    _isButtonPressed = true;
+                    _startDictado();
+                  },
+                  onPointerUp: (_) {
+                    _isButtonPressed = false;
+                    _stopDictado();
+                  },
+                  child: Icon(
+                    Icons.mic,
+                    color: _isListening ? Colors.red : Theme.of(context).iconTheme.color,
+                  ),
+                ),
+              ),
               maxLines: 5,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -151,6 +270,8 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
     _titleController.dispose();
     _messageController.dispose();
     _categoryController.dispose();
+    _speech.cancel();
     super.dispose();
   }
 }
+
