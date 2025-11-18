@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loop_talk/bloc/categoria_bloc.dart';
 import 'package:loop_talk/bloc/categoria_event.dart';
-import 'package:loop_talk/bloc/categoria_state.dart';
 import 'package:loop_talk/bloc/create_topic_bloc.dart';
 import 'package:loop_talk/components/snackbar_helper.dart';
 import 'package:loop_talk/model/categoria.dart';
@@ -19,8 +18,12 @@ class CreateTopicPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text('Crear Nuevo Tópico'),
+        backgroundColor: const Color(0xFF7C3AED),
+        elevation: 0,
+        foregroundColor: Colors.white,
       ),
       body: BlocListener<CreateTopicBloc, CreateTopicState>(
         listener: (context, state) {
@@ -163,101 +166,168 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Título'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese un título';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                labelText: 'Mensaje',
-                suffixIcon: Listener(
-                  onPointerDown: (_) {
-                    _isButtonPressed = true;
-                    _startDictado();
-                  },
-                  onPointerUp: (_) {
-                    _isButtonPressed = false;
-                    _stopDictado();
-                  },
-                  child: Icon(
-                    Icons.mic,
-                    color: _isListening ? Colors.red : Theme.of(context).iconTheme.color,
-                  ),
-                ),
-              ),
-              maxLines: 5,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese un mensaje';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _categoryController,
-              readOnly: true,
-              decoration: const InputDecoration(
-                labelText: 'Categoría',
-                hintText: 'Seleccione una categoría',
-              ),
-              onTap: () async {
-                final Categoria? result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SelectCategoryPage()),
-                );
+    final theme = Theme.of(context);
+    final purpleColor = const Color(0xFF7C3AED);
 
-                if (result != null) {
-                  setState(() {
-                    _selectedCategoria = result;
-                    _categoryController.text = result.nombre;
-                  });
-                }
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor seleccione una categoría';
-                }
-                return null;
-              },
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Nuevo Tópico',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Comparte tus ideas con la comunidad.',
+              style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 32),
-            BlocBuilder<CreateTopicBloc, CreateTopicState>(
-              builder: (context, state) {
-                if (state is CreateTopicInProgress) {
-                  return const CircularProgressIndicator();
-                }
-                return ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      context.read<CreateTopicBloc>().add(
-                            CreateTopicSubmitted(
-                              titulo: _titleController.text,
-                              mensaje: _messageController.text,
-                              idCurso: _selectedCategoria!.id!,
-                            ),
-                          );
-                    }
-                  },
-                  child: const Text('Crear Tópico'),
-                );
-              },
+            Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Título',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: purpleColor, width: 2.0),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor ingrese un título';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      labelText: 'Mensaje',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: purpleColor, width: 2.0),
+                      ),
+                      suffixIcon: Listener(
+                        onPointerDown: (_) {
+                          _isButtonPressed = true;
+                          _startDictado();
+                        },
+                        onPointerUp: (_) {
+                          _isButtonPressed = false;
+                          _stopDictado();
+                        },
+                        child: AnimatedScale(
+                          scale: _isListening ? 1.2 : 1.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Icon(
+                            Icons.mic,
+                            color: _isListening ? purpleColor : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                    maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor ingrese un mensaje';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _categoryController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: 'Categoría',
+                      hintText: 'Seleccione una categoría',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide(color: purpleColor, width: 2.0),
+                      ),
+                      suffixIcon: const Icon(Icons.arrow_drop_down),
+                    ),
+                    onTap: () async {
+                      final Categoria? result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SelectCategoryPage()),
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          _selectedCategoria = result;
+                          _categoryController.text = result.nombre;
+                        });
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor seleccione una categoría';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  BlocBuilder<CreateTopicBloc, CreateTopicState>(
+                    builder: (context, state) {
+                      if (state is CreateTopicInProgress) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: purpleColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            context.read<CreateTopicBloc>().add(
+                                  CreateTopicSubmitted(
+                                    titulo: _titleController.text,
+                                    mensaje: _messageController.text,
+                                    idCurso: _selectedCategoria!.id!,
+                                  ),
+                                );
+                          }
+                        },
+                        child: const Text('Crear Tópico', style: TextStyle(fontWeight: FontWeight.bold)),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
