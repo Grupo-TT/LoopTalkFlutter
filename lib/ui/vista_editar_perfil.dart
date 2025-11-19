@@ -1,9 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:loop_talk/components/snackbar_helper.dart';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'package:loop_talk/components/snackbar_helper.dart';
+
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class VistaEditarPerfil extends StatefulWidget {
   const VistaEditarPerfil({super.key});
@@ -13,49 +19,71 @@ class VistaEditarPerfil extends StatefulWidget {
 }
 
 class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
-  final TextEditingController _nombreController = TextEditingController(text: 'Miguel_Andres');
-  final TextEditingController _emailController = TextEditingController(text: 'correoplaceholder@gmail.com');
+  late TextEditingController _nombreController;
+  late TextEditingController _correoController;
+
   final ImagePicker _picker = ImagePicker();
   XFile? _imagenSeleccionada;
 
   @override
+  void initState() {
+    super.initState();
+
+    final state = context.read<AuthBloc>().state;
+
+    if (state is AuthSuccess) {
+      _nombreController = TextEditingController(text: state.usuario.nombre);
+      _correoController = TextEditingController(
+        text: state.usuario.correoElectronico,
+      );
+    } else {
+      _nombreController = TextEditingController();
+      _correoController = TextEditingController();
+    }
+  }
+
+  @override
   void dispose() {
     _nombreController.dispose();
-    _emailController.dispose();
+    _correoController.dispose();
     super.dispose();
   }
 
-  
+  // ────────────────────────────────────────────────
+  //   PERMISOS
+  // ────────────────────────────────────────────────
   Future<bool> _solicitarPermiso(ImageSource source) async {
-    
-    final permission = source == ImageSource.camera ? Permission.camera : Permission.photos;
+    final permission = source == ImageSource.camera
+        ? Permission.camera
+        : Permission.photos;
     final sourceText = source == ImageSource.camera ? 'cámara' : 'galería';
 
     final status = await permission.request();
 
     if (!mounted) return false;
 
-    if (status.isGranted) {
-      return true;
-    } 
-    
+    if (status.isGranted) return true;
+
     if (status.isDenied) {
-      
-        SnackBarHelper.showInfoMessage(context, 'Permiso denegado para acceder a la $sourceText.');
-      
-    }else if (status.isPermanentlyDenied) {
-    SnackBarHelper.showActionMessage(
-      context,
-      'El permiso para la $sourceText está denegado permanentemente.',
-      actionLabel: 'Ajustes',
-      onActionPressed: () => openAppSettings(),
-    );
+      SnackBarHelper.showInfoMessage(
+        context,
+        'Permiso denegado para acceder a la $sourceText.',
+      );
+    } else if (status.isPermanentlyDenied) {
+      SnackBarHelper.showActionMessage(
+        context,
+        'El permiso para la $sourceText está denegado permanentemente.',
+        actionLabel: 'Ajustes',
+        onActionPressed: () => openAppSettings(),
+      );
+    }
+
+    return false;
   }
 
-  return false;
-}
-
-  
+  // ────────────────────────────────────────────────
+  //   SELECTOR DE IMAGEN
+  // ────────────────────────────────────────────────
   Future<void> _abrirSelectorImagen(ImageSource source) async {
     final XFile? imagen = await _picker.pickImage(
       source: source,
@@ -63,6 +91,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
       maxHeight: 512,
       imageQuality: 75,
     );
+
     if (imagen != null) {
       setState(() {
         _imagenSeleccionada = imagen;
@@ -70,114 +99,154 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
     }
   }
 
-  
   void _mostrarOpcionesImagen() {
     showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galería'),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  
-                  final bool tienePermiso = await _solicitarPermiso(ImageSource.gallery);
-                  
-                  if (tienePermiso) {
-                    _abrirSelectorImagen(ImageSource.gallery);
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Cámara'),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  
-                  final bool tienePermiso = await _solicitarPermiso(ImageSource.camera);
-                  
-                  if (tienePermiso) {
-                    _abrirSelectorImagen(ImageSource.camera);
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galería'),
+              onTap: () async {
+                Navigator.pop(context);
 
-  void _guardarCambios() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cambios guardados exitosamente')),
-    );
-    Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-          child: Center(
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!, width: 1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ),
+                if (await _solicitarPermiso(ImageSource.gallery)) {
+                  _abrirSelectorImagen(ImageSource.gallery);
+                }
+              },
             ),
-          ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Cámara'),
+              onTap: () async {
+                Navigator.pop(context);
+
+                if (await _solicitarPermiso(ImageSource.camera)) {
+                  _abrirSelectorImagen(ImageSource.camera);
+                }
+              },
+            ),
+          ],
         ),
-        title: const Text(
-          'Editor Perfil',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────────
+  //   GUARDAR CAMBIOS – BLO C
+  // ────────────────────────────────────────────────
+  void _guardarCambios() {
+    final nombre = _nombreController.text.trim();
+    final correo = _correoController.text.trim();
+
+    if (nombre.isEmpty || correo.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Por favor completa todos los campos")),
+      );
+      return;
+    }
+
+    if (!correo.contains('@')) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Correo inválido")));
+      return;
+    }
+
+    context.read<AuthBloc>().add(
+      UpdateProfileEvent(
+        nombre: nombre,
+        correoElectronico: correo,
+        // aquí podrías enviar _imagenSeleccionada si tu API lo soporta
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────────
+  //   CONFIRMAR SALIR
+  // ────────────────────────────────────────────────
+  Future<void> _confirmarSalir() async {
+    final salir = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Descartar cambios'),
+        content: const Text('¿Deseas salir sin guardar los cambios?'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check, color: Colors.black, size: 28),
-            onPressed: _guardarCambios,
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Salir'),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    );
+
+    if (!mounted) return;
+    if (salir == true) Navigator.pop(context);
+  }
+
+  // ────────────────────────────────────────────────
+  //   UI
+  // ────────────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthSuccess) {
+          SnackBarHelper.showInfoMessage(
+            context,
+            "Cambios guardados exitosamente",
+          );
+          Navigator.pop(context);
+        } else if (state is AuthFailure) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.deepPurple,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: _confirmarSalir,
+            ),
+            title: const Text(
+              'Editar perfil',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.check, color: Colors.white),
+                onPressed: isLoading ? null : _guardarCambios,
+              ),
+            ],
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(20),
             children: [
               const SizedBox(height: 20),
+
+              // FOTO DE PERFIL
               Center(
                 child: Stack(
                   children: [
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 110,
+                      height: 110,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.black, width: 2),
@@ -187,15 +256,11 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                             ? Image.file(
                                 File(_imagenSeleccionada!.path),
                                 fit: BoxFit.cover,
-                                width: 100,
-                                height: 100,
                               )
-                            : const Center(
-                                child: Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: Colors.black,
-                                ),
+                            : const Icon(
+                                Icons.person,
+                                size: 60,
+                                color: Colors.black,
                               ),
                       ),
                     ),
@@ -207,13 +272,13 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.grey[300],
                             shape: BoxShape.circle,
+                            color: Colors.grey[300],
                             border: Border.all(color: Colors.white, width: 2),
                           ),
                           child: const Icon(
                             Icons.camera_alt,
-                            size: 18,
+                            size: 20,
                             color: Colors.black,
                           ),
                         ),
@@ -222,80 +287,52 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 40),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nombre Completo',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w500,
-                    ),
+
+              // NOMBRE
+              TextField(
+                controller: _nombreController,
+                decoration: InputDecoration(
+                  labelText: 'Nombre',
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _nombreController,
-                    decoration: InputDecoration(
-                      hintText: 'Ingresa tu nombre completo',
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.black, width: 1),
-                      ),
-                    ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 1),
                   ),
-                ],
+                ),
               ),
-              const SizedBox(height: 24),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Email',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w500,
-                    ),
+
+              const SizedBox(height: 20),
+
+              // CORREO
+              TextField(
+                controller: _correoController,
+                enabled: false,
+                decoration: InputDecoration(
+                  labelText: 'Correo electrónico',
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'Ingresa tu email',
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.black, width: 1),
-                      ),
-                    ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 1),
                   ),
-                ],
+                ),
               ),
+
+              const SizedBox(height: 30),
+
+              if (isLoading)
+                const Center(
+                  child: CircularProgressIndicator(color: Colors.black),
+                ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
-

@@ -25,24 +25,30 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   List<Widget> get _pages => [
-        const VistaInicio(),
-        const VistaCategorias(),
-        const VistaNotificaciones(),
-        VistaPerfil(onNavigateToHome: _onNavigateToHome),
-      ];
+    const VistaInicio(),
+    const VistaCategorias(),
+    const VistaNotificaciones(),
+    VistaPerfil(onNavigateToHome: _onNavigateToHome),
+  ];
 
   List<String> get _pageTitles => [
-        'Inicio',
-        'Categorías',
-        'Notificaciones',
-        'Perfil',
-      ];
+    'Inicio',
+    'Categorías',
+    'Notificaciones',
+    'Perfil',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_pageTitles[_currentIndex], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(
+          _pageTitles[_currentIndex],
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -53,7 +59,9 @@ class _MainNavigationState extends State<MainNavigation> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CreateTopicPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const CreateTopicPage(),
+                  ),
                 ).then((_) {
                   context.read<TopicoBloc>().add(LoadTopicos());
                 });
@@ -61,10 +69,7 @@ class _MainNavigationState extends State<MainNavigation> {
             ),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       extendBody: true,
       bottomNavigationBar: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -73,7 +78,7 @@ class _MainNavigationState extends State<MainNavigation> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 5),
             ),
@@ -137,12 +142,8 @@ class _MainNavigationState extends State<MainNavigation> {
   }) {
     final isActive = _currentIndex == index;
     return BottomNavigationBarItem(
-      icon: Icon(
-        isActive ? activeIcon : icon,
-        size: 28,
-      ),
+      icon: Icon(isActive ? activeIcon : icon, size: 28),
       label: label,
     );
   }
 }
-

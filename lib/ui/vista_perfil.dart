@@ -8,116 +8,98 @@ import 'vista_editar_perfil.dart';
 
 class VistaPerfil extends StatelessWidget {
   final VoidCallback? onNavigateToHome;
-  
+
   const VistaPerfil({super.key, this.onNavigateToHome});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthFailure) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
+        }
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-          child: Center(
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!, width: 1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
-                  onPressed: () {
-                    if (onNavigateToHome != null) {
-                      onNavigateToHome!();
-                    }
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ),
-            ),
+        appBar: AppBar(
+          title: const Text(
+            'Mi Perfil',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
+          backgroundColor: Colors.deepPurple,
+          elevation: 0,
+          automaticallyImplyLeading: false,
         ),
-        title: const Text(
-          'Perfil',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is AuthSuccess) {
-            final usuario = state.usuario;
+        body: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            if (state is AuthSuccess) {
+              final usuario = state.usuario;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black, width: 2),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.black, width: 2),
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              size: 40,
+                              color: Colors.black,
+                            ),
                           ),
-                          child: const Icon(Icons.person, size: 40, color: Colors.black),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          usuario.nombre,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                          const SizedBox(height: 12),
+                          Text(
+                            usuario.nombre,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          usuario.correoElectronico,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFFB8860B),
-                            fontWeight: FontWeight.w400,
+                          const SizedBox(height: 4),
+                          Text(
+                            usuario.correoElectronico,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFFB8860B),
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildStatsSection(),
-                  const SizedBox(height: 32),
-                  _buildSectionTitle('General'),
-                  const SizedBox(height: 12),
-                  _buildGeneralSection(context),
-                  const SizedBox(height: 32),
-                  _buildSectionTitle('Sesión'),
-                  const SizedBox(height: 12),
-                  _buildSessionSection(context),
-                ],
-              ),
-            );
-          } else if (state is AuthLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            return const Center(child: Text("No hay usuario autenticado"));
-          }
-        },
+                    const SizedBox(height: 24),
+                    _buildStatsSection(),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('General'),
+                    const SizedBox(height: 12),
+                    _buildGeneralSection(context),
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Sesión'),
+                    const SizedBox(height: 12),
+                    _buildSessionSection(context),
+                  ],
+                ),
+              );
+            } else if (state is AuthLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              return const Center(child: Text("No hay usuario autenticado"));
+            }
+          },
+        ),
       ),
-
     );
   }
 
@@ -140,72 +122,23 @@ class VistaPerfil extends StatelessWidget {
                 backgroundColor: Colors.deepPurple,
               ),
               onPressed: () {
-                // Cerrar el diálogo
                 Navigator.of(dialogContext).pop();
-                
-                // Disparar el evento de logout
                 context.read<AuthBloc>().add(LogoutEvent());
-                
-                // Navegar al login y eliminar toda la pila de navegación
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) => const VistaLogin()),
                   (route) => false,
                 );
               },
-              child: const Text('Cerrar sesión', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Cerrar sesión',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
       },
     );
   }
-
-  // Widget _buildProfileHeader() {
-  //   return Center(
-  //     child: Column(
-  //       children: [
-  //         // Avatar
-  //         Container(
-  //           width: 80,
-  //           height: 80,
-  //           decoration: BoxDecoration(
-  //             shape: BoxShape.circle,
-  //             border: Border.all(color: Colors.black, width: 2),
-  //           ),
-  //           child: const Center(
-  //             child: Icon(
-  //               Icons.person,
-  //               size: 40,
-  //               color: Colors.black,
-  //             ),
-  //           ),
-  //         ),
-  //         const SizedBox(height: 12),
-          
-  //         // Nombre
-  //         const Text(
-  //           'Miguel_Andres',
-  //           style: TextStyle(
-  //             fontSize: 18,
-  //             fontWeight: FontWeight.w600,
-  //             color: Colors.black,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 4),
-          
-  //         // Email
-  //         const Text(
-  //           'correoplaceholder@gmail.com',
-  //           style: TextStyle(
-  //             fontSize: 14,
-  //             color: Color(0xFFB8860B),
-  //             fontWeight: FontWeight.w400,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildStatsSection() {
     return Row(
@@ -299,12 +232,17 @@ class VistaPerfil extends StatelessWidget {
             icon: Icons.person_outline,
             title: 'Editar Perfil',
             subtitle: 'Actualiza tu foto, nombre o correo',
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const VistaEditarPerfil(),
                 ),
+              );
+
+              // 🔄 Cuando regresa de editar, se reconstruye automáticamente
+              context.read<AuthBloc>().emit(
+                (context.read<AuthBloc>().state as AuthSuccess),
               );
             },
             showDivider: true,
@@ -367,11 +305,7 @@ class VistaPerfil extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  size: 24,
-                  color: iconColor ?? Colors.black,
-                ),
+                Icon(icon, size: 24, color: iconColor ?? Colors.black),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -407,12 +341,7 @@ class VistaPerfil extends StatelessWidget {
           ),
         ),
         if (showDivider)
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: Colors.grey[300],
-            indent: 56,
-          ),
+          Divider(height: 1, thickness: 1, color: Colors.grey[300], indent: 56),
       ],
     );
   }

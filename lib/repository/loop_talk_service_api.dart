@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../../model/usuario.dart';
-import '../../model/rol.dart';
 
 
 class LoopTalkServiceApi {
@@ -81,8 +80,6 @@ Future<Usuario> actualizarUsuario({
   required int id,
   required String nombre,
   required String correo,
-  required String contrasenia,
-  required Rol rol,
   required String token,
 }) async {
   final url = Uri.parse('$baseUrl/usuario/$id');
@@ -97,8 +94,6 @@ Future<Usuario> actualizarUsuario({
       "id": id,
       "nombre": nombre,
       "correoElectronico": correo,
-      "contrasenia": contrasenia,
-      "rol": rol.name.toUpperCase(),
     }),
   );
 

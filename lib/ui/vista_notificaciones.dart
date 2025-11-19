@@ -7,7 +7,10 @@ class VistaNotificaciones extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificaciones', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Notificaciones',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -78,7 +81,7 @@ class VistaNotificaciones extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: iconColor, size: 24),
@@ -96,10 +99,7 @@ class VistaNotificaciones extends StatelessWidget {
             const SizedBox(height: 4),
             Text(message, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 4),
-            Text(
-              time,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
+            Text(time, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
           ],
         ),
         trailing: !isRead
@@ -116,4 +116,3 @@ class VistaNotificaciones extends StatelessWidget {
     );
   }
 }
-
