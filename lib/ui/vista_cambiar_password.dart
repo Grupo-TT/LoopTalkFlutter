@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/auth_bloc.dart';
+import '../../bloc/auth_event.dart';
+import '../../bloc/auth_state.dart';
 
 class VistaCambiarPassword extends StatefulWidget {
   const VistaCambiarPassword({super.key});
@@ -8,15 +12,18 @@ class VistaCambiarPassword extends StatefulWidget {
 }
 
 class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
-  final TextEditingController _passwordActualController = TextEditingController();
-  final TextEditingController _nuevaPasswordController = TextEditingController();
-  final TextEditingController _confirmarPasswordController = TextEditingController();
-  
+  final TextEditingController _passwordActualController =
+      TextEditingController();
+  final TextEditingController _nuevaPasswordController =
+      TextEditingController();
+  final TextEditingController _confirmarPasswordController =
+      TextEditingController();
+
   bool _obscurePasswordActual = true;
   bool _obscureNuevaPassword = true;
   bool _obscureConfirmarPassword = true;
 
-  // Validaciones en tiempo real
+  
   bool _tieneMinimoCaracteres = false;
   bool _tieneMayusculasYNumeros = false;
   bool _esDiferente = false;
@@ -41,49 +48,54 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
   void _validarPassword() {
     final nuevaPassword = _nuevaPasswordController.text;
     final passwordActual = _passwordActualController.text;
-    
+
     setState(() {
-      // Al menos 8 caracteres
       _tieneMinimoCaracteres = nuevaPassword.length >= 8;
-      
-      // Incluir mayúsculas y números
-      _tieneMayusculasYNumeros = nuevaPassword.contains(RegExp(r'[A-Z]')) &&
-                                  nuevaPassword.contains(RegExp(r'[0-9]'));
-      
-      // Ser diferente a la anterior
-      _esDiferente = nuevaPassword.isNotEmpty && 
-                     passwordActual.isNotEmpty &&
-                     nuevaPassword != passwordActual;
+
+      _tieneMayusculasYNumeros =
+          nuevaPassword.contains(RegExp(r'[A-Z]')) &&
+          nuevaPassword.contains(RegExp(r'[0-9]'));
+
+      _esDiferente =
+          nuevaPassword.isNotEmpty &&
+          passwordActual.isNotEmpty &&
+          nuevaPassword != passwordActual;
     });
   }
 
   bool _esFormularioValido() {
     return _tieneMinimoCaracteres &&
-           _tieneMayusculasYNumeros &&
-           _esDiferente &&
-           _confirmarPasswordController.text == _nuevaPasswordController.text &&
-           _nuevaPasswordController.text.isNotEmpty;
+        _tieneMayusculasYNumeros &&
+        _esDiferente &&
+        _confirmarPasswordController.text == _nuevaPasswordController.text &&
+        _nuevaPasswordController.text.isNotEmpty;
   }
 
   void _actualizarPassword() {
     if (!_esFormularioValido()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, completa todos los requisitos de la contraseña'),
+          content: Text(
+            'Por favor, completa todos los requisitos de la contraseña',
+          ),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    // TODO: Implementar llamada a la API
+    context.read<AuthBloc>().add(
+      UpdatePasswordEvent(
+        nuevaContrasenia: _nuevaPasswordController.text.trim(),
+      ),
+    );
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Contraseña actualizada correctamente'),
         backgroundColor: Colors.green,
       ),
     );
-    
+
     Navigator.of(context).pop();
   }
 
@@ -99,95 +111,25 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Título
-            const Text(
-              'Cambiar Contraseña',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+      body: BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+            );
+          } else if (state is AuthSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Contraseña actualizada correctamente'),
+                backgroundColor: Colors.green,
               ),
-            ),
-            const SizedBox(height: 8),
-            // Subtítulo
-            Text(
-              'Ingresa tu contraseña actual y crea una nueva para tu cuenta.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 32),
-            // Campo Contraseña Actual
-            _buildPasswordField(
-              controller: _passwordActualController,
-              label: 'Contraseña Actual',
-              obscureText: _obscurePasswordActual,
-              onToggleVisibility: () {
-                setState(() {
-                  _obscurePasswordActual = !_obscurePasswordActual;
-                });
-              },
-            ),
-            const SizedBox(height: 24),
-            // Campo Nueva Contraseña
-            _buildPasswordField(
-              controller: _nuevaPasswordController,
-              label: 'Nueva Contraseña',
-              obscureText: _obscureNuevaPassword,
-              onToggleVisibility: () {
-                setState(() {
-                  _obscureNuevaPassword = !_obscureNuevaPassword;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            // Requisitos de contraseña
-            _buildPasswordRequirements(),
-            const SizedBox(height: 24),
-            // Campo Confirmar Contraseña
-            _buildPasswordField(
-              controller: _confirmarPasswordController,
-              label: 'Confirmar contraseña',
-              obscureText: _obscureConfirmarPassword,
-              onToggleVisibility: () {
-                setState(() {
-                  _obscureConfirmarPassword = !_obscureConfirmarPassword;
-                });
-              },
-            ),
-            const SizedBox(height: 40),
-            // Botón Actualizar
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _esFormularioValido() ? _actualizarPassword : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black87,
-                  disabledBackgroundColor: Colors.grey[300],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Actualizar',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+            );
+            Navigator.of(context).pop();
+          }
+        },
+        builder: (context, state) {
+          return _buildForm();
+        },
       ),
     );
   }
@@ -226,10 +168,15 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.black87, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             suffixIcon: IconButton(
               icon: Icon(
-                obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                obscureText
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
                 color: Colors.grey[600],
               ),
               onPressed: onToggleVisibility,
@@ -270,10 +217,7 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
             _tieneMayusculasYNumeros,
           ),
           const SizedBox(height: 8),
-          _buildRequirement(
-            'Ser diferente a la anterior',
-            _esDiferente,
-          ),
+          _buildRequirement('Ser diferente a la anterior', _esDiferente),
         ],
       ),
     );
@@ -300,5 +244,95 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
       ],
     );
   }
-}
 
+  Widget _buildForm() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Cambiar Contraseña',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ingresa tu contraseña actual y crea una nueva para tu cuenta.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          _buildPasswordField(
+            controller: _passwordActualController,
+            label: 'Contraseña Actual',
+            obscureText: _obscurePasswordActual,
+            onToggleVisibility: () {
+              setState(() => _obscurePasswordActual = !_obscurePasswordActual);
+            },
+          ),
+
+          const SizedBox(height: 24),
+
+          _buildPasswordField(
+            controller: _nuevaPasswordController,
+            label: 'Nueva Contraseña',
+            obscureText: _obscureNuevaPassword,
+            onToggleVisibility: () {
+              setState(() => _obscureNuevaPassword = !_obscureNuevaPassword);
+            },
+          ),
+
+          const SizedBox(height: 16),
+
+          _buildPasswordRequirements(),
+
+          const SizedBox(height: 24),
+
+          _buildPasswordField(
+            controller: _confirmarPasswordController,
+            label: 'Confirmar contraseña',
+            obscureText: _obscureConfirmarPassword,
+            onToggleVisibility: () {
+              setState(
+                () => _obscureConfirmarPassword = !_obscureConfirmarPassword,
+              );
+            },
+          ),
+
+          const SizedBox(height: 40),
+
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: _esFormularioValido() ? _actualizarPassword : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black87,
+                disabledBackgroundColor: Colors.grey[300],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Actualizar',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
