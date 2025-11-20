@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../model/topico.dart';
 import '../model/comentario.dart';
+import '../services/firebase_likes_service.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_state.dart';
 
 class VistaDetalleTopico extends StatefulWidget {
   final Topico topico;
@@ -19,15 +23,23 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
   final Map<int, bool> _likedComentarios = {};
   final Map<int, int> _likeCounts = {};
   final List<Comentario> _comentarios = [];
-  bool _isLiked = false;
-  int _likeCount = 360;
+  final FirebaseLikesService _likesService = FirebaseLikesService();
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
-    // Inicializar likes del post
-    _likeCount = 360;
-    _isLiked = false;
+    
+    // Obtener userId del AuthBloc
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthSuccess) {
+      _currentUserId = authState.usuario.id.toString();
+    }
+    
+    // Inicializar post en Firebase
+    if (widget.topico.id != null) {
+      _likesService.initializePost(widget.topico.id!);
+    }
     
     // TODO: Cargar comentarios desde la API
     // Por ahora, datos de ejemplo
@@ -253,82 +265,92 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
   }
 
   Widget _buildLikeDislikeButton() {
-    return Container(
-      height: 36,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[800]!, width: 1.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Sección de like
-          InkWell(
-            onTap: () {
-              setState(() {
-                _isLiked = !_isLiked;
-                if (_isLiked) {
-                  _likeCount++;
-                } else {
-                  _likeCount--;
-                }
-              });
-              // TODO: Llamar a la API cuando esté lista
-            },
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              bottomLeft: Radius.circular(8),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    if (widget.topico.id == null || _currentUserId == null) {
+      return Container(); // No mostrar si no hay ID
+    }
+
+    return StreamBuilder<int>(
+      stream: _likesService.getLikesCount(widget.topico.id!),
+      builder: (context, snapshot) {
+        final likesCount = snapshot.data ?? 0;
+        
+        return FutureBuilder<bool>(
+          future: _likesService.hasUserLiked(widget.topico.id!, _currentUserId!),
+          builder: (context, likeSnapshot) {
+            final isLiked = likeSnapshot.data ?? false;
+            
+            return Container(
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[800]!, width: 1.5),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    _isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                    size: 18,
-                    color: Colors.grey[800],
+                  // Sección de like
+                  InkWell(
+                    onTap: () {
+                      _likesService.likePost(widget.topico.id!, _currentUserId!);
+                    },
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      bottomLeft: Radius.circular(8),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                            size: 18,
+                            color: isLiked ? Colors.blueAccent : Colors.grey[800],
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            likesCount.toString(),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isLiked ? Colors.blueAccent : Colors.grey[800],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _likeCount.toString(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[800],
-                      fontWeight: FontWeight.w500,
+                  // Separador vertical
+                  Container(
+                    width: 1,
+                    height: 20,
+                    color: Colors.grey[300],
+                  ),
+                  // Sección de dislike
+                  InkWell(
+                    onTap: () {
+                      _likesService.dislikePost(widget.topico.id!, _currentUserId!);
+                    },
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(8),
+                      bottomRight: Radius.circular(8),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Icon(
+                        Icons.thumb_down_outlined,
+                        size: 18,
+                        color: Colors.grey[800],
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-          // Separador vertical
-          Container(
-            width: 1,
-            height: 20,
-            color: Colors.grey[300],
-          ),
-          // Sección de dislike
-          InkWell(
-            onTap: () {
-              // TODO: Implementar dislike
-            },
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(8),
-              bottomRight: Radius.circular(8),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Icon(
-                Icons.thumb_down_outlined,
-                size: 18,
-                color: Colors.grey[800],
-              ),
-            ),
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 

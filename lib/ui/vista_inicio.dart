@@ -11,6 +11,7 @@ import '../bloc/categoria_event.dart';
 import '../bloc/categoria_state.dart';
 import '../model/topico.dart';
 import '../model/categoria.dart';
+import '../services/firebase_likes_service.dart';
 import 'vista_detalle_topico.dart';
 
 class VistaInicio extends StatefulWidget {
@@ -23,9 +24,8 @@ class VistaInicio extends StatefulWidget {
 class _VistaInicioState extends State<VistaInicio> {
   String? _selectedCategory;
   int? _selectedCategoryId;
-  // Mapa para almacenar el estado de likes de cada tópico
-  final Map<int, bool> _likedTopicos = {};
-  final Map<int, int> _likeCounts = {};
+  final FirebaseLikesService _likesService = FirebaseLikesService();
+  String? _currentUserId;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   bool _isHeaderVisible = true;
@@ -42,6 +42,12 @@ class _VistaInicioState extends State<VistaInicio> {
         statusBarBrightness: Brightness.light,
       ),
     );
+    
+    // Obtener userId del AuthBloc
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthSuccess) {
+      _currentUserId = authState.usuario.id.toString();
+    }
     
     context.read<TopicoBloc>().add(LoadTopicos());
     context.read<CategoriaBloc>().add(LoadCategorias());
@@ -114,11 +120,10 @@ class _VistaInicioState extends State<VistaInicio> {
                     }).toList();
                   }
                   
-                  // Inicializar contadores de likes si no existen
+                  // Inicializar posts en Firebase si no existen
                   for (var topico in topicos) {
-                    if (topico.id != null && !_likeCounts.containsKey(topico.id)) {
-                      _likeCounts[topico.id!] = 360; // Valor inicial
-                      _likedTopicos[topico.id!] = false;
+                    if (topico.id != null) {
+                      _likesService.initializePost(topico.id!);
                     }
                   }
                   
@@ -633,50 +638,57 @@ class _VistaInicioState extends State<VistaInicio> {
   }
 
   Widget _buildLikeButton(int? topicoId) {
-    if (topicoId == null) {
-      return _buildEngagementMetric(Icons.thumb_up_outlined, '360');
+    if (topicoId == null || _currentUserId == null) {
+      return StreamBuilder<int>(
+        stream: _likesService.getLikesCount(0),
+        builder: (context, snapshot) {
+          final count = snapshot.data ?? 0;
+          return _buildEngagementMetric(Icons.thumb_up_outlined, count.toString());
+        },
+      );
     }
-    
-    final isLiked = _likedTopicos[topicoId] ?? false;
-    final likeCount = _likeCounts[topicoId] ?? 360;
-    
-    return InkWell(
-      onTap: () {
-        setState(() {
-          final wasLiked = _likedTopicos[topicoId] ?? false;
-          _likedTopicos[topicoId] = !wasLiked;
-          
-          if (wasLiked) {
-            _likeCounts[topicoId] = (likeCount - 1);
-          } else {
-            _likeCounts[topicoId] = (likeCount + 1);
-          }
-        });
-        // TODO: Llamar a la API cuando esté lista
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-              size: 18,
-              color: isLiked ? Colors.blue : Colors.grey[600],
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '${_likeCounts[topicoId] ?? 360}',
-              style: TextStyle(
-                fontSize: 14,
-                color: isLiked ? Colors.blue : Colors.grey[700],
-                fontWeight: FontWeight.w500,
+
+    return StreamBuilder<int>(
+      stream: _likesService.getLikesCount(topicoId),
+      builder: (context, countSnapshot) {
+        final likesCount = countSnapshot.data ?? 0;
+        
+        return FutureBuilder<bool>(
+          future: _likesService.hasUserLiked(topicoId, _currentUserId!),
+          builder: (context, likeSnapshot) {
+            final isLiked = likeSnapshot.data ?? false;
+            
+            return InkWell(
+              onTap: () {
+                _likesService.likePost(topicoId, _currentUserId!);
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                      size: 18,
+                      color: isLiked ? Colors.blueAccent : Colors.grey[600],
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      likesCount.toString(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isLiked ? Colors.blueAccent : Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 

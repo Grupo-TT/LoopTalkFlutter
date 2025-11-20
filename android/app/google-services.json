@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "518370326908",
+    "project_id": "looptalk",
+    "storage_bucket": "looptalk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:518370326908:android:56e9fede4169d73ffd0cf9",
+        "android_client_info": {
+          "package_name": "com.example.loop_talk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdhe7eMjtX7LUc6l_vCTUdm3m-Pi9MlDY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
