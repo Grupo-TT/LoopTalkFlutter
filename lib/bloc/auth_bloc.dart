@@ -21,7 +21,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         emit(AuthSuccess(usuario));
       } catch (e) {
-        final message = e.toString().replaceFirst('Exception:', '');
+        String message = 'Error desconocido';
+        if (e.toString().contains('TimeoutException') || 
+            e.toString().contains('Tiempo de espera')) {
+          message = 'Tiempo de espera agotado. Verifica tu conexión a internet.';
+        } else if (e.toString().contains('SocketException') || 
+                   e.toString().contains('Failed host lookup')) {
+          message = 'No se pudo conectar al servidor. Verifica tu conexión.';
+        } else {
+          message = e.toString().replaceFirst('Exception:', '').trim();
+          if (message.isEmpty) {
+            message = 'Error al iniciar sesión. Intenta nuevamente.';
+          }
+        }
         emit(AuthFailure(message));
       }
     });

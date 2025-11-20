@@ -40,22 +40,29 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    // Ocultar AppBar cuando estemos en la vista de perfil (índice 3) o inicio (índice 0)
+    final bool showAppBar = _currentIndex != 3 && _currentIndex != 0;
+    
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _pageTitles[_currentIndex],
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        actions: [
-          if (_currentIndex == 0)
-            IconButton(
-              icon: const Icon(Icons.add, color: Colors.white),
+      appBar: showAppBar
+          ? AppBar(
+              title: Text(
+                _pageTitles[_currentIndex],
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              backgroundColor: Colors.deepPurple,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              actions: const [],
+            )
+          : null,
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      backgroundColor: Colors.white,
+      floatingActionButton: _currentIndex == 0
+          ? FloatingActionButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -66,42 +73,42 @@ class _MainNavigationState extends State<MainNavigation> {
                   context.read<TopicoBloc>().add(LoadTopicos());
                 });
               },
-            ),
-        ],
-      ),
-      body: IndexedStack(index: _currentIndex, children: _pages),
-      extendBody: true,
+              backgroundColor: Colors.black87,
+              child: const Icon(
+                Icons.chat_bubble,
+                color: Colors.white,
+                size: 28,
+              ),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            selectedItemColor: Colors.black,
-            unselectedItemColor: Colors.grey[400],
-            selectedFontSize: 0,
-            unselectedFontSize: 0,
-            showUnselectedLabels: false,
-            showSelectedLabels: false,
-            elevation: 0,
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: Colors.black87,
+          unselectedItemColor: Colors.grey[500],
+          selectedFontSize: 0,
+          unselectedFontSize: 0,
+          showUnselectedLabels: false,
+          showSelectedLabels: false,
+          elevation: 0,
             items: [
               _buildNavItem(
                 icon: Icons.home_outlined,
@@ -110,8 +117,8 @@ class _MainNavigationState extends State<MainNavigation> {
                 index: 0,
               ),
               _buildNavItem(
-                icon: Icons.category_outlined,
-                activeIcon: Icons.category,
+                icon: Icons.explore_outlined,
+                activeIcon: Icons.explore,
                 label: '',
                 index: 1,
               ),
@@ -128,7 +135,6 @@ class _MainNavigationState extends State<MainNavigation> {
                 index: 3,
               ),
             ],
-          ),
         ),
       ),
     );
