@@ -4,6 +4,7 @@ import '../bloc/topico_bloc.dart';
 import '../bloc/topico_event.dart';
 import '../bloc/topico_state.dart';
 import '../model/topico.dart';
+import 'create_topic_page.dart';
 
 class VistaInicio extends StatefulWidget {
   const VistaInicio({super.key});
@@ -21,60 +22,52 @@ class _VistaInicioState extends State<VistaInicio> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
-      body: BlocBuilder<TopicoBloc, TopicoState>(
-        builder: (context, state) {
-          if (state is TopicoLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is TopicoLoaded) {
-            final topicos = state.topicos;
-            if (topicos.isEmpty) {
-              return _buildEmptyState();
-            }
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<TopicoBloc>().add(LoadTopicos());
-              },
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: topicos.length,
-                itemBuilder: (context, index) {
-                  final topico = topicos[index];
-                  return _buildTopicoCard(topico);
-                },
-              ),
-            );
-          }
-
-          if (state is TopicoError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error: ${state.message}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<TopicoBloc>().add(LoadTopicos()),
-                    child: const Text('Reintentar'),
-                  ),
-                ],
-              ),
-            );
-          }
-
+    return BlocBuilder<TopicoBloc, TopicoState>(
+      builder: (context, state) {
+        if (state is TopicoLoading) {
           return const Center(child: CircularProgressIndicator());
-        },
-      ),
+        }
+
+        if (state is TopicoLoaded) {
+          final topicos = state.topicos;
+          if (topicos.isEmpty) {
+            return _buildEmptyState();
+          }
+          return RefreshIndicator(
+            onRefresh: () async {
+              context.read<TopicoBloc>().add(LoadTopicos());
+            },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: topicos.length,
+              itemBuilder: (context, index) {
+                final topico = topicos[index];
+                return _buildTopicoCard(topico);
+              },
+            ),
+          );
+        }
+
+        if (state is TopicoError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('Error: ${state.message}'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.read<TopicoBloc>().add(LoadTopicos()),
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return const Center(child: CircularProgressIndicator());
+      },
     );
   }
 

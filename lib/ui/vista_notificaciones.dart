@@ -6,23 +6,6 @@ class VistaNotificaciones extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Notificaciones',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.done_all, color: Colors.white),
-            onPressed: () {
-              // Marcar todas como leídas
-            },
-          ),
-        ],
-      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [

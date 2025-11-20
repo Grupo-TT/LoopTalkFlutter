@@ -1,54 +1,87 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
- class SnackBarHelper {
-       static void showErrorMessage(BuildContext context, String message) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-             message,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-           ),
-            backgroundColor: Colors.redAccent, 
-            behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-             borderRadius: BorderRadius.circular(12),
+class SnackBarHelper {
+  static void showErrorMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
           ),
-          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
-         ),
-       );
-     }
-
-
-      static void showSuccesssMessage(BuildContext context, String message) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-             message,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-           ),
-            backgroundColor: const Color(0xFF4CAF50), 
-            behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-             borderRadius: BorderRadius.circular(12),
-          ),
-          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-         ),
-       );
-     }
-
-     static void showInfoMessage(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        message,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
       ),
-      backgroundColor: const Color(0xFF2196F3), 
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-    ),
-  );
+    );
+  }
+
+  static void showSuccesssMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      ),
+    );
+  }
+
+  static void showInfoMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: const Color(0xFF2196F3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      ),
+    );
+  }
+
+  static void showActionMessage(
+    BuildContext context,
+    String message, {
+    required String actionLabel,
+    required VoidCallback onActionPressed,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: const Color(
+          0xFF2196F3,
+        ), 
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 25),
+        action: SnackBarAction(
+          label: actionLabel,
+          textColor: Colors.white,
+          onPressed: onActionPressed,
+        ),
+      ),
+    );
+  }
 }
-     
-    }
