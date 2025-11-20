@@ -7,7 +7,9 @@ import '../../utils/token_storage.dart';
 
 class TopicoService {
     final String baseUrl = dotenv.env['API_URL']!;
-
+    
+    // Timeout de 30 segundos para las peticiones
+    static const Duration _timeout = Duration(seconds: 30);
 
   Future<List<Topico>> obtenerTopicos() async {
     final url = Uri.parse("$baseUrl/topico?size=1000");
@@ -23,7 +25,9 @@ class TopicoService {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
-    );
+    ).timeout(_timeout, onTimeout: () {
+      throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+    });
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body);
@@ -53,7 +57,9 @@ class TopicoService {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode(topico.toJsonCreate(idCurso)),
-    );
+    ).timeout(_timeout, onTimeout: () {
+      throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+    });
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return Topico.fromJson(jsonDecode(response.body));

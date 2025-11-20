@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'ui/vista_login.dart';
 import 'repository/loop_talk_service_api.dart';
 import 'repository/topico_service.dart';
@@ -12,9 +14,19 @@ import 'bloc/categoria_bloc.dart';
 import 'bloc/create_topic_bloc.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: "assets/.env");
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  
+  try {
+    // Inicializar Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print('Error inicializando Firebase: $e');
+  }
+  
+  await dotenv.load(fileName: "assets/.env");
   
   final authService = LoopTalkServiceApi();
   final topicoService = TopicoService();

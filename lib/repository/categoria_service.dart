@@ -6,6 +6,9 @@ import 'package:loop_talk/model/categoria.dart';
 
 class CategoriaService {
     final String baseUrl = dotenv.env['API_URL']!;
+    
+    // Timeout de 30 segundos para las peticiones
+    static const Duration _timeout = Duration(seconds: 30);
 
     Future<List<Categoria>> obtenerCategorias() async{
       final url = Uri.parse("$baseUrl/curso");
@@ -21,7 +24,9 @@ class CategoriaService {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-      );
+      ).timeout(_timeout, onTimeout: () {
+        throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+      });
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -52,7 +57,9 @@ class CategoriaService {
           "Authorization": "Bearer $token",
         },
         body: jsonEncode(categoria.toJsonCreate()),
-      );
+      ).timeout(_timeout, onTimeout: () {
+        throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+      });
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> data = jsonDecode(response.body);
@@ -81,7 +88,9 @@ class CategoriaService {
           "Authorization": "Bearer $token",
         },
         body: jsonEncode(categoria.toJsonUpdate()),
-      );
+      ).timeout(_timeout, onTimeout: () {
+        throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+      });
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> data = jsonDecode(response.body);

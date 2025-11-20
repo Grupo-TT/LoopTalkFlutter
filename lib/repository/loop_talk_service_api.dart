@@ -7,6 +7,9 @@ import '../../model/usuario.dart';
 class LoopTalkServiceApi {
   final String baseUrl = dotenv.env['API_URL']!;
   
+  // Timeout de 30 segundos para las peticiones
+  static const Duration _timeout = Duration(seconds: 30);
+  
   Future<String> login(String correo, String contrasenia) async {
     final url = Uri.parse("$baseUrl/login");
 
@@ -17,7 +20,9 @@ class LoopTalkServiceApi {
         "correoElectronico": correo,
         "contrasenia": contrasenia,
       }),
-    );
+    ).timeout(_timeout, onTimeout: () {
+      throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+    });
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body);
@@ -51,7 +56,9 @@ class LoopTalkServiceApi {
         "contrasenia": contrasenia,
         "rol": "ESTUDIANTE",
       }),
-    );
+    ).timeout(_timeout, onTimeout: () {
+      throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+    });
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
@@ -68,7 +75,9 @@ class LoopTalkServiceApi {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     },
-  );
+  ).timeout(_timeout, onTimeout: () {
+    throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+  });
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
     return Usuario.fromJson(data);
@@ -95,7 +104,9 @@ Future<Usuario> actualizarUsuario({
       "nombre": nombre,
       "correoElectronico": correo,
     }),
-  );
+  ).timeout(_timeout, onTimeout: () {
+    throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+  });
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
