@@ -31,17 +31,23 @@ class RegisterEvent extends AuthEvent {
 /// Evento para cerrar sesión
 class LogoutEvent extends AuthEvent {}
 
-
 /// Evento para actualizar perfil del usuario
 class UpdateProfileEvent extends AuthEvent {
   final String nombre;
   final String correoElectronico;
 
-  UpdateProfileEvent({
-    required this.nombre,
-    required this.correoElectronico,
-  });
+  UpdateProfileEvent({required this.nombre, required this.correoElectronico});
 
   @override
   List<Object?> get props => [nombre, correoElectronico];
+}
+
+/// Evento para actualizar contraseña del usuario
+class UpdatePasswordEvent extends AuthEvent {
+  final String nuevaContrasenia;
+
+  UpdatePasswordEvent({required this.nuevaContrasenia});
+
+  @override
+  List<Object?> get props => [nuevaContrasenia];
 }

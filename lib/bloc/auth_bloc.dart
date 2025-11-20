@@ -22,11 +22,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthSuccess(usuario));
       } catch (e) {
         String message = 'Error desconocido';
-        if (e.toString().contains('TimeoutException') || 
+        if (e.toString().contains('TimeoutException') ||
             e.toString().contains('Tiempo de espera')) {
-          message = 'Tiempo de espera agotado. Verifica tu conexión a internet.';
-        } else if (e.toString().contains('SocketException') || 
-                   e.toString().contains('Failed host lookup')) {
+          message =
+              'Tiempo de espera agotado. Verifica tu conexión a internet.';
+        } else if (e.toString().contains('SocketException') ||
+            e.toString().contains('Failed host lookup')) {
           message = 'No se pudo conectar al servidor. Verifica tu conexión.';
         } else {
           message = e.toString().replaceFirst('Exception:', '').trim();
@@ -87,6 +88,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthSuccess(usuarioActualizado));
         } catch (e) {
           emit(AuthFailure("Error al actualizar el perfil: $e"));
+        }
+      }
+    });
+
+    on<UpdatePasswordEvent>((event, emit) async {
+      final currentState = state;
+
+      if (currentState is AuthSuccess) {
+        emit(AuthLoading());
+
+        try {
+          final usuarioActual = currentState.usuario;
+          final token = await TokenStorage.getToken();
+
+          if (token == null) throw Exception("Token no encontrado");
+
+          final usuarioActualizado = await authService.cambiarContrasenia(
+            id: usuarioActual.id,
+            nuevaContrasenia: event.nuevaContrasenia,
+            token: token,
+          );
+
+          emit(AuthSuccess(usuarioActualizado));
+        } catch (e) {
+          emit(AuthFailure("Error al cambiar la contraseña: $e"));
         }
       }
     });
