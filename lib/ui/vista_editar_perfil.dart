@@ -158,7 +158,6 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
       UpdateProfileEvent(
         nombre: nombre,
         correoElectronico: correo,
-        // aquí podrías enviar _imagenSeleccionada si tu API lo soporta
       ),
     );
   }
