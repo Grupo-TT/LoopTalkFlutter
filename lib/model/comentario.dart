@@ -28,7 +28,9 @@ class Comentario {
   Map<String, dynamic> toJsonCreate(int topicoId) {
     return {
       'contenido': contenido,
+      'mensaje': contenido,
       'topicoId': topicoId,
+      'topico': {'id': topicoId},
     };
   }
 }

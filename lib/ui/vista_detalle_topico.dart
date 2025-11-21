@@ -5,6 +5,10 @@ import '../model/comentario.dart';
 import '../services/firebase_likes_service.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
+import '../bloc/comentario_bloc.dart';
+import '../bloc/comentario_event.dart';
+import '../bloc/comentario_state.dart';
+import '../repository/comentario_service.dart';
 
 class VistaDetalleTopico extends StatefulWidget {
   final Topico topico;
@@ -22,7 +26,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
   final TextEditingController _commentController = TextEditingController();
   final Map<int, bool> _likedComentarios = {};
   final Map<int, int> _likeCounts = {};
-  final List<Comentario> _comentarios = [];
+  // Comentarios serán gestionados por ComentarioBloc
   final FirebaseLikesService _likesService = FirebaseLikesService();
   String? _currentUserId;
 
@@ -41,38 +45,10 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
       _likesService.initializePost(widget.topico.id!);
     }
     
-    // TODO: Cargar comentarios desde la API
-    // Por ahora, datos de ejemplo
-    _loadExampleComments();
+    // Comentarios se cargarán mediante ComentarioBloc creado en build
   }
 
-  void _loadExampleComments() {
-    // Datos de ejemplo - reemplazar con llamada a API
-    setState(() {
-      _comentarios.addAll([
-        Comentario(
-          id: 1,
-          contenido: 'Te recomiendo "El fin de la infancia" de Arthur C. Clarke. Es corto, muy accesible y tiene un giro increíble sobre la humanidad. Ideal para empezar sin abrumarse.',
-          fechaCreacion: DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
-          autor: widget.topico.autor,
-        ),
-        Comentario(
-          id: 2,
-          contenido: 'Muchas Gracias!!! 😊',
-          fechaCreacion: DateTime.now().subtract(const Duration(minutes: 2)).toIso8601String(),
-          autor: widget.topico.autor,
-        ),
-      ]);
-      
-      // Inicializar contadores de likes
-      for (var comentario in _comentarios) {
-        if (comentario.id != null) {
-          _likeCounts[comentario.id!] = 234;
-          _likedComentarios[comentario.id!] = false;
-        }
-      }
-    });
-  }
+  
 
   String _formatTimeAgo(String? fechaCreacion) {
     if (fechaCreacion == null) return 'Hace un momento';
@@ -105,9 +81,33 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
     final tiempoPublicacion = _formatTimeAgo(widget.topico.fechaCreacion);
     final categoria = widget.topico.curso?.nombre ?? 'General';
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
+    return BlocProvider(
+      create: (_) => ComentarioBloc(ComentarioService())..add(LoadRespuestas(widget.topico.id!)),
+      child: BlocListener<ComentarioBloc, ComentarioState>(
+        listener: (context, state) {
+          if (state is ComentarioOperationSuccess) {
+            // Comentario creado correctamente
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Comentario enviado')),
+            );
+            // Limpiar input
+            _commentController.clear();
+            // Recargar la lista para que el nuevo comentario aparezca inmediatamente
+            if (widget.topico.id != null) {
+              context.read<ComentarioBloc>().add(LoadRespuestas(widget.topico.id!));
+            }
+          } else if (state is ComentarioLoaded) {
+            // Si el estado cargó una lista nueva, también limpiar el input
+            _commentController.clear();
+          } else if (state is ComentarioError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.message}')),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
         bottom: false,
         child: Column(
           children: [
@@ -235,22 +235,55 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Lista de comentarios
-                    if (_comentarios.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(40.0),
-                        child: Center(
-                          child: Text(
-                            'No hay comentarios aún',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[500],
+                    // Lista de comentarios (cargadas desde API vía ComentarioBloc)
+                    BlocBuilder<ComentarioBloc, ComentarioState>(
+                      builder: (context, state) {
+                        if (state is ComentarioLoading) {
+                          return const Padding(
+                            padding: EdgeInsets.all(40.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        } else if (state is ComentarioLoaded) {
+                          final respuestas = state.respuestas;
+                          if (respuestas.isEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.all(40.0),
+                              child: Center(
+                                child: Text(
+                                  'Sin comentarios, sé el primero en responder',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Column(
+                            children: respuestas.map((comentario) => _buildCommentCard(comentario)).toList(),
+                          );
+                        } else if (state is ComentarioError) {
+                          return Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: Center(
+                              child: Text(
+                                'Sin comentarios, sé el primero en responder',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      )
-                    else
-                      ..._comentarios.map((comentario) => _buildCommentCard(comentario)),
+                          );
+                        }
+
+                        return const Padding(
+                          padding: EdgeInsets.all(40.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 100), // Espacio para el input de comentarios
                   ],
                 ),
@@ -261,7 +294,9 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildLikeDislikeButton() {
@@ -367,7 +402,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
           // Scroll a comentarios o focus en input
         },
         borderRadius: BorderRadius.circular(8),
-        child: Padding(
+              child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -378,13 +413,18 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                 color: Colors.grey[800],
               ),
               const SizedBox(width: 6),
-              Text(
-                _comentarios.length.toString(),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.w500,
-                ),
+              BlocBuilder<ComentarioBloc, ComentarioState>(
+                builder: (context, state) {
+                  final count = state is ComentarioLoaded ? state.respuestas.length : 0;
+                  return Text(
+                    count.toString(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -481,7 +521,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                           setState(() {
                             final wasLiked = _likedComentarios[comentario.id] ?? false;
                             _likedComentarios[comentario.id!] = !wasLiked;
-                            
+
                             if (wasLiked) {
                               _likeCounts[comentario.id!] = (likeCount - 1);
                             } else {
@@ -533,95 +573,110 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
   }
 
   Widget _buildCommentInput() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Colors.grey[300]!, width: 0.5),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            // Botón de agregar
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.add, color: Colors.black87, size: 20),
-                onPressed: () {
-                  // TODO: Implementar funcionalidad de agregar media
-                },
-              ),
+    // Usar Builder para obtener un BuildContext que esté por debajo del BlocProvider
+    return Builder(
+      builder: (innerContext) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(color: Colors.grey[300]!, width: 0.5),
             ),
-            const SizedBox(width: 12),
-            // Campo de texto
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(20),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Row(
+              children: [
+                // Botón de agregar
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.add, color: Colors.black87, size: 20),
+                    onPressed: () {
+                      // TODO: Implementar funcionalidad de agregar media
+                    },
+                  ),
                 ),
-                child: TextField(
-                  controller: _commentController,
-                  decoration: InputDecoration(
-                    hintText: 'Añade un comentario',
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                const SizedBox(width: 12),
+                // Campo de texto
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TextField(
+                      controller: _commentController,
+                      onSubmitted: (_) => _submitComment(innerContext),
+                      decoration: InputDecoration(
+                        hintText: 'Añade un comentario',
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      style: const TextStyle(fontSize: 15),
                     ),
                   ),
-                  style: const TextStyle(fontSize: 15),
                 ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Botón de enviar
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.send,
-                  color: Colors.white,
-                  size: 20,
+                const SizedBox(width: 12),
+                // Botón de enviar
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.send,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () => _submitComment(innerContext),
+                  ),
                 ),
-                onPressed: () {
-                  if (_commentController.text.trim().isNotEmpty) {
-                    // TODO: Enviar comentario a la API
-                    setState(() {
-                      _comentarios.add(
-                        Comentario(
-                          id: _comentarios.length + 1,
-                          contenido: _commentController.text.trim(),
-                          fechaCreacion: DateTime.now().toIso8601String(),
-                          autor: widget.topico.autor,
-                        ),
-                      );
-                      _likeCounts[_comentarios.length] = 0;
-                      _likedComentarios[_comentarios.length] = false;
-                      _commentController.clear();
-                    });
-                  }
-                },
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
+  }
+
+  void _submitComment(BuildContext ctx) {
+    final texto = _commentController.text.trim();
+    if (texto.isEmpty || widget.topico.id == null) return;
+
+    final nueva = Comentario(
+      id: null,
+      contenido: texto,
+      fechaCreacion: DateTime.now().toIso8601String(),
+      autor: widget.topico.autor,
+      topicoId: widget.topico.id,
+    );
+
+    // Usar el ComentarioBloc provisto en el árbol (creado en build)
+    try {
+      final bloc = ctx.read<ComentarioBloc>();
+      bloc.add(CreateRespuesta(widget.topico.id!, nueva));
+    } catch (e, st) {
+      // Mostrar mensaje visible para que el usuario sepa que falló
+      // y registrar en la consola para depuración.
+      print('Error al despachar CreateRespuesta: $e\n$st');
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(content: Text('No se pudo enviar el comentario')),
+      );
+    }
   }
 
   @override
