@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+//import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loop_talk/bloc/auth_bloc.dart';
 import 'package:loop_talk/bloc/auth_state.dart';
@@ -120,7 +120,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: Container(
+      child: ColoredBox(
         color: Colors.white,
         child: Column(
           children: [
@@ -442,7 +442,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
               child: IconButton(
                 icon: const Icon(Icons.add_photo_alternate, color: Colors.black87),
                 onPressed: () {
-                  // TODO: Implementar selección de imagen
+                  
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Funcionalidad de imagen próximamente')),
                   );

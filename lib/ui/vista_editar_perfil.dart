@@ -112,7 +112,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                 Navigator.pop(context);
 
                 if (await _solicitarPermiso(ImageSource.gallery)) {
-                  _abrirSelectorImagen(ImageSource.gallery);
+                  await _abrirSelectorImagen(ImageSource.gallery);
                 }
               },
             ),
@@ -123,7 +123,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                 Navigator.pop(context);
 
                 if (await _solicitarPermiso(ImageSource.camera)) {
-                  _abrirSelectorImagen(ImageSource.camera);
+                  await _abrirSelectorImagen(ImageSource.camera);
                 }
               },
             ),

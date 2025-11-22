@@ -12,6 +12,7 @@ import 'bloc/auth_bloc.dart';
 import 'bloc/topico_bloc.dart';
 import 'bloc/categoria_bloc.dart';
 import 'bloc/create_topic_bloc.dart';
+import 'dart:developer';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,7 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    print('Error inicializando Firebase: $e');
+    log('Error inicializando Firebase: $e');
   }
   
   await dotenv.load(fileName: "assets/.env");

@@ -9,6 +9,7 @@ import '../bloc/comentario_bloc.dart';
 import '../bloc/comentario_event.dart';
 import '../bloc/comentario_state.dart';
 import '../repository/comentario_service.dart';
+import 'dart:developer';
 
 class VistaDetalleTopico extends StatefulWidget {
   final Topico topico;
@@ -528,7 +529,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                               _likeCounts[comentario.id!] = (likeCount + 1);
                             }
                           });
-                          // TODO: Llamar a la API cuando esté lista
+                          
                         }
                       : null,
                   child: Padding(
@@ -599,7 +600,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                   child: IconButton(
                     icon: const Icon(Icons.add, color: Colors.black87, size: 20),
                     onPressed: () {
-                      // TODO: Implementar funcionalidad de agregar media
+                      
                     },
                   ),
                 ),
@@ -672,7 +673,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
     } catch (e, st) {
       // Mostrar mensaje visible para que el usuario sepa que falló
       // y registrar en la consola para depuración.
-      print('Error al despachar CreateRespuesta: $e\n$st');
+      log('Error al despachar CreateRespuesta: $e\n$st');
       ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(content: Text('No se pudo enviar el comentario')),
       );

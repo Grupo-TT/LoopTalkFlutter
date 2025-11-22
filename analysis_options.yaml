@@ -9,20 +9,31 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-linter:
-  # The lint rules applied to this project can be customized in the
-  # section below to disable rules from the `package:flutter_lints/flutter.yaml`
-  # included above or to enable additional rules. A list of all available lints
-  # and their documentation is published at https://dart.dev/lints.
-  #
-  # Instead of disabling a lint rule for the entire project in the
-  # section below, it can also be suppressed for a single line of code
-  # or a specific dart file by using the `// ignore: name_of_lint` and
-  # `// ignore_for_file: name_of_lint` syntax on the line or in the file
-  # producing the lint.
-  rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+analyzer:
+  exclude:
+    - "**/*.g.dart"        # No revisar archivos generados por el sistema
+    - "**/*.freezed.dart"  # No revisar código generado por Freezed
+    - "**/*.gen.dart"      # No revisar otros archivos generados
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+linter:
+  rules:
+    prefer_const_constructors: true            # Usar const cuando algo no cambia
+    prefer_final_fields: true                  # Usar final si la variable no va a cambiar
+    prefer_const_literals_to_create_immutables: true  # Hacer listas/mapas const si no cambian
+    use_key_in_widget_constructors: true       # Pedir un "key" en widgets para mejor control
+    avoid_unnecessary_containers: true         # Evitar Containers que no hacen nada útil
+    sized_box_for_whitespace: true             # Usar SizedBox en vez de Container para espacio
+    use_colored_box: true                      # Usar ColoredBox en vez de Container para color
+    prefer_is_empty: true                      # Usar .isEmpty en vez de comparar con ""
+    prefer_is_not_empty: true                  # Usar .isNotEmpty en vez de comparar con ""
+    use_super_parameters: true                 # Usar "super.algo" en constructores más limpio
+
+    curly_braces_in_flow_control_structures: true   # Poner llaves {} en if, for, while siempre
+
+    use_build_context_synchronously: true      # Evita usar context después de un await que puede romper la app
+    unawaited_futures: true                    # Te avisa cuando ignore una Future sin await
+    cancel_subscriptions: true                 # Pedir cancelar streams cuando ya no se usan
+    close_sinks: true                          # Pedir cerrar controladores de streams para evitar fugas de memoria
+    avoid_print: true
+    avoid_returning_null_for_void: true        # Evitar retornar null en funciones void
+    prefer_null_aware_operators: true          # Usar operadores ?? y ?.

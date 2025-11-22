@@ -70,6 +70,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     builder: (context) => const CreateTopicPage(),
                   ),
                 ).then((_) {
+                  if (!mounted) return;
                   context.read<TopicoBloc>().add(LoadTopicos());
                 });
               },
