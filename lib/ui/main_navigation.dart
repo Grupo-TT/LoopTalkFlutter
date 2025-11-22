@@ -64,6 +64,7 @@ class _MainNavigationState extends State<MainNavigation> {
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
               onPressed: () {
+                final topicoBloc = context.read<TopicoBloc>();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -71,7 +72,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   ),
                 ).then((_) {
                   if (!mounted) return;
-                  context.read<TopicoBloc>().add(LoadTopicos());
+                  topicoBloc.add(LoadTopicos());
                 });
               },
               backgroundColor: Colors.black87,
