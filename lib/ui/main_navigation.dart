@@ -64,13 +64,15 @@ class _MainNavigationState extends State<MainNavigation> {
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
               onPressed: () {
+                final topicoBloc = context.read<TopicoBloc>();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CreateTopicPage(),
                   ),
                 ).then((_) {
-                  context.read<TopicoBloc>().add(LoadTopicos());
+                  if (!mounted) return;
+                  topicoBloc.add(LoadTopicos());
                 });
               },
               backgroundColor: Colors.black87,

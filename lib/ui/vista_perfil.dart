@@ -348,7 +348,7 @@ class VistaPerfil extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(dialogContext).pop();
-                          // TODO: Implementar eliminación de cuenta cuando esté listo
+                          
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Funcionalidad de eliminar cuenta próximamente'),

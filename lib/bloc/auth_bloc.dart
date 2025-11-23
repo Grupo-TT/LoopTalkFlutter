@@ -116,5 +116,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       }
     });
+     on<RefreshAuth>((event, emit) async {
+      final token = await TokenStorage.getToken();
+      if (token == null) {
+        emit(AuthInitial());
+        return;
+      }
+
+      try {
+        final decoded = JwtDecoder.decode(token);
+        final userId = decoded['id'];
+
+        final usuario = await authService.obtenerUsuarioPorId(userId, token);
+
+        emit(AuthSuccess(usuario));
+      } catch (_) {
+        emit(AuthFailure("No se pudo refrescar el usuario"));
+      }
+    });
   }
 }

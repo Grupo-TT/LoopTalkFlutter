@@ -31,6 +31,8 @@ class RegisterEvent extends AuthEvent {
 /// Evento para cerrar sesión
 class LogoutEvent extends AuthEvent {}
 
+class RefreshAuth extends AuthEvent {}
+
 /// Evento para actualizar perfil del usuario
 class UpdateProfileEvent extends AuthEvent {
   final String nombre;

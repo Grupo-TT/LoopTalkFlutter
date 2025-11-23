@@ -7,6 +7,7 @@ import '../bloc/auth_state.dart';
 import 'vista_recuperar.dart';
 import 'vista_registrar.dart';
 import 'main_navigation.dart';
+import 'dart:async';
 
 bool _obscurePasswordLogin = true;
 
@@ -47,15 +48,16 @@ class _VistaLoginState extends State<VistaLogin> {
           if (state is AuthSuccess) {
             await Future.delayed(const Duration(milliseconds: 100));
             
-            if (context.mounted) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MainNavigation(),
-                ),
-              );
-            }
-          } else if (state is AuthFailure) {
+            if (!context.mounted) return;
+                  unawaited(
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigation(),
+                      ),
+                    ),
+                  );
+                } else if (state is AuthFailure) {
             SnackBarHelper.showErrorMessage(context, state.error);
           }
         },
@@ -67,12 +69,12 @@ class _VistaLoginState extends State<VistaLogin> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   //Espacio en blanco para mantener a altura
-                  Align(
+                  const Align(
                     alignment: Alignment.topLeft,
                     child: SizedBox(
                       width: 48,
                       height: 48,
-                      child: const SizedBox(),
+                      child:  SizedBox(),
                     ),
                   ),
 

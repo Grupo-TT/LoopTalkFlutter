@@ -1,30 +1,67 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loop_talk/main.dart';
+import 'package:loop_talk/bloc/auth_bloc.dart';
+import 'package:loop_talk/bloc/topico_bloc.dart';
+import 'package:loop_talk/bloc/categoria_bloc.dart';
+import 'package:loop_talk/bloc/create_topic_bloc.dart';
+import 'helpers/test_helpers.mocks.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const LoopTalkApp());
+  // Declarar mocks para los servicios
+  late MockLoopTalkServiceApi mockAuthService;
+  late MockTopicoService mockTopicoService;
+  late MockCategoriaService mockCategoriaService;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  // Declarar instancias de los BLoCs
+  late AuthBloc authBloc;
+  late TopicoBloc topicoBloc;
+  late CategoriaBloc categoriaBloc;
+  late CreateTopicBloc createTopicBloc;
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  setUp(() {
+    // Inicializar los mocks
+    mockAuthService = MockLoopTalkServiceApi();
+    mockTopicoService = MockTopicoService();
+    mockCategoriaService = MockCategoriaService();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Inicializar los BLoCs con los mocks
+    authBloc = AuthBloc(mockAuthService);
+    topicoBloc = TopicoBloc(mockTopicoService);
+    categoriaBloc = CategoriaBloc(mockCategoriaService);
+    createTopicBloc = CreateTopicBloc(topicoService: mockTopicoService);
+  });
+
+  tearDown(() {
+    // Cerrar los BLoCs
+    authBloc.close();
+    topicoBloc.close();
+    categoriaBloc.close();
+    createTopicBloc.close();
+  });
+
+  testWidgets('Smoke test: La app debería mostrar la pantalla de login inicial', (WidgetTester tester) async {
+    // Construir la app con todos los providers necesarios
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: authBloc),
+          BlocProvider.value(value: topicoBloc),
+          BlocProvider.value(value: categoriaBloc),
+          BlocProvider.value(value: createTopicBloc),
+        ],
+        child: const LoopTalkApp(),
+      ),
+    );
+
+    // Esperar a que los widgets se rendericen
+    await tester.pumpAndSettle();
+
+    // Verificar que los elementos clave de la pantalla de login están presentes
+    expect(find.text('¡Hola!'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Email'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Contraseña'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Ingresar'), findsOneWidget);
   });
 }

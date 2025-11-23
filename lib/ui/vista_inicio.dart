@@ -84,7 +84,7 @@ class _VistaInicioState extends State<VistaInicio> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: Column(
         children: [
@@ -228,7 +228,7 @@ class _VistaInicioState extends State<VistaInicio> {
   }
 
   Widget _buildHeader() {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: SafeArea(
         bottom: false,
@@ -236,7 +236,7 @@ class _VistaInicioState extends State<VistaInicio> {
           decoration: const BoxDecoration(
             color: Colors.white,
           ),
-          padding: EdgeInsets.only(
+          padding: const EdgeInsets.only(
             left: 20,
             right: 20,
             top: 12,

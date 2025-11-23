@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import '../../utils/token_storage.dart';
 import 'package:loop_talk/model/comentario.dart';
+import 'dart:developer';
 
 class ComentarioService {
   final String baseUrl = dotenv.env['API_URL']!;
@@ -64,14 +65,14 @@ class ComentarioService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final Map<String, dynamic> data = jsonDecode(response.body);
-      print('crearRespuesta: status=${response.statusCode} body=${response.body}');
+      log('crearRespuesta: status=${response.statusCode} body=${response.body}');
       return Comentario.fromJson(data);
     } else if (response.statusCode == 401) {
       throw Exception('Sesión expirada');
     } else if (response.statusCode == 403) {
       throw Exception('Sin permisos');
     } else {
-      print('crearRespuesta error: status=${response.statusCode} body=${response.body}');
+      log('crearRespuesta error: status=${response.statusCode} body=${response.body}');
       throw Exception('Error al crear la respuesta: ${response.statusCode}');
     }
   }

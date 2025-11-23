@@ -124,25 +124,25 @@ class _VistaTopicosState extends State<VistaTopicos> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                         const Row(
                             children: [
-                              const CircleAvatar(
+                              CircleAvatar(
                                 radius: 12,
                                 backgroundColor: Colors.blueGrey,
                                 child: Icon(Icons.person, size: 16, color: Colors.white),
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
+                              SizedBox(width: 8),
+                               Text(
                                 'u/Anonimo',
                                 style: TextStyle(fontSize: 13, color: Colors.grey),
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
+                              SizedBox(width: 8),
+                               Text(
                                 'r/General',
                                 style: TextStyle(fontSize: 13, color: Colors.blue, fontWeight: FontWeight.bold),
                               ),
-                              const Spacer(),
-                              const Icon(Icons.more_horiz, size: 18, color: Colors.grey),
+                               Spacer(),
+                               Icon(Icons.more_horiz, size: 18, color: Colors.grey),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -162,11 +162,11 @@ class _VistaTopicosState extends State<VistaTopicos> {
                           ),
                           const SizedBox(height: 12),
 
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
-                                children: const [
+                                children:  [
                                   Icon(Icons.arrow_upward, size: 20, color: Colors.grey),
                                   SizedBox(width: 4),
                                   Text('0', style: TextStyle(fontSize: 13, color: Colors.grey)),
@@ -175,13 +175,13 @@ class _VistaTopicosState extends State<VistaTopicos> {
                                 ],
                               ),
                               Row(
-                                children: const [
+                                children:  [
                                   Icon(Icons.comment, size: 18, color: Colors.grey),
                                   SizedBox(width: 4),
                                   Text('0 Comentarios', style: TextStyle(fontSize: 13, color: Colors.grey)),
                                 ],
                               ),
-                              const Icon(Icons.share, size: 18, color: Colors.grey),
+                              Icon(Icons.share, size: 18, color: Colors.grey),
                             ],
                           ),
                         ],

@@ -12,6 +12,7 @@ import 'bloc/auth_bloc.dart';
 import 'bloc/topico_bloc.dart';
 import 'bloc/categoria_bloc.dart';
 import 'bloc/create_topic_bloc.dart';
+import 'dart:developer';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -22,11 +23,15 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    log('Firebase inicializado correctamente.');
+    
+    await dotenv.load(fileName: "assets/.env");
+    log('Variables de entorno cargadas.');
+
   } catch (e) {
-    print('Error inicializando Firebase: $e');
+    log('Error durante la inicialización: $e');
+    
   }
-  
-  await dotenv.load(fileName: "assets/.env");
   
   final authService = LoopTalkServiceApi();
   final topicoService = TopicoService();
@@ -51,12 +56,22 @@ Future<void> main() async {
       child: const LoopTalkApp(),
     ),
   );
-  
-  FlutterNativeSplash.remove();
 }
 
-class LoopTalkApp extends StatelessWidget {
+class LoopTalkApp extends StatefulWidget {
   const LoopTalkApp({super.key});
+
+  @override
+  State<LoopTalkApp> createState() => _LoopTalkAppState();
+}
+
+class _LoopTalkAppState extends State<LoopTalkApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Se asegura de remover el splash screen después de que la app está lista.
+    FlutterNativeSplash.remove();
+  }
 
   @override
   Widget build(BuildContext context) {
