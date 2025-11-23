@@ -1,4 +1,4 @@
-name: El diploy a Firebase
+name: El Diploy a Firebase
 
 on:
   pull_request:
@@ -24,9 +24,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Create .env file
+        run: echo "API_URL=${{ secrets.API_URL }}" > assets/.env
+
       - name: Run tests
         run: flutter test   
-            
 
       - name: Build APK (release)
         run: flutter build apk --release
