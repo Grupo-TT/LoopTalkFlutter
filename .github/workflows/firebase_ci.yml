@@ -1,8 +1,6 @@
 name: El Diploy a Firebase
 
 on:
-  pull_request:
-    branches: [ development ]
   push:
     branches: [ development ]
 
