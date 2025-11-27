@@ -5,8 +5,9 @@ import 'package:loop_talk/bloc/topico_event.dart';
 import 'package:loop_talk/ui/create_topic_page.dart';
 import 'vista_inicio.dart';
 import 'vista_categorias.dart';
-import 'vista_notificaciones.dart';
 import 'vista_perfil.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_state.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -24,30 +25,45 @@ class _MainNavigationState extends State<MainNavigation> {
     });
   }
 
-  List<Widget> get _pages => [
-    const VistaInicio(),
-    const VistaCategorias(),
-    const VistaNotificaciones(),
-    VistaPerfil(onNavigateToHome: _onNavigateToHome),
-  ];
-
-  List<String> get _pageTitles => [
-    'Inicio',
-    'Categorías',
-    'Notificaciones',
-    'Perfil',
-  ];
+  // Pages and titles are built dynamically in build() based on user role.
 
   @override
   Widget build(BuildContext context) {
-    // Ocultar AppBar cuando estemos en la vista de perfil (índice 3) o inicio (índice 0)
-    final bool showAppBar = _currentIndex != 3 && _currentIndex != 0;
+    // showAppBar se calcula después de construir las páginas (depende del índice final de Perfil)
     
+    // Obtener rol desde AuthBloc (si está autenticado)
+    final authState = context.read<AuthBloc>().state;
+    final bool isEstudiante = authState is AuthSuccess && authState.usuario.rol.name.toUpperCase() == 'ESTUDIANTE';
+
+    // Construir listas de páginas e íconos según el rol
+    final List<Widget> pages = isEstudiante
+        ? [
+            const VistaInicio(),
+            VistaPerfil(onNavigateToHome: _onNavigateToHome),
+          ]
+        : [
+            const VistaInicio(),
+            const VistaCategorias(),
+            VistaPerfil(onNavigateToHome: _onNavigateToHome),
+          ];
+
+    final List<String> pageTitles = isEstudiante
+        ? ['Inicio', 'Perfil']
+        : ['Inicio', 'Categorías', 'Perfil'];
+
+    // Asegurar que _currentIndex está dentro del rango
+    if (_currentIndex >= pages.length) {
+      _currentIndex = 0;
+    }
+
+    // Ocultar AppBar cuando estemos en la vista de perfil (última página) o inicio (índice 0)
+    final bool showAppBar = _currentIndex != 0 && _currentIndex != (pages.length - 1);
+
     return Scaffold(
       appBar: showAppBar
           ? AppBar(
               title: Text(
-                _pageTitles[_currentIndex],
+                pageTitles[_currentIndex],
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -59,7 +75,7 @@ class _MainNavigationState extends State<MainNavigation> {
               actions: const [],
             )
           : null,
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(index: _currentIndex, children: pages),
       backgroundColor: Colors.white,
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
@@ -111,32 +127,16 @@ class _MainNavigationState extends State<MainNavigation> {
           showUnselectedLabels: false,
           showSelectedLabels: false,
           elevation: 0,
-            items: [
-              _buildNavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: '',
-                index: 0,
-              ),
-              _buildNavItem(
-                icon: Icons.explore_outlined,
-                activeIcon: Icons.explore,
-                label: '',
-                index: 1,
-              ),
-              _buildNavItem(
-                icon: Icons.notifications_outlined,
-                activeIcon: Icons.notifications,
-                label: '',
-                index: 2,
-              ),
-              _buildNavItem(
-                icon: Icons.person_outline,
-                activeIcon: Icons.person,
-                label: '',
-                index: 3,
-              ),
-            ],
+            items: isEstudiante
+                ? [
+                    _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: '', index: 0),
+                    _buildNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: '', index: 1),
+                  ]
+                : [
+                    _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: '', index: 0),
+                    _buildNavItem(icon: Icons.explore_outlined, activeIcon: Icons.explore, label: '', index: 1),
+                    _buildNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: '', index: 2),
+                  ],
         ),
       ),
     );

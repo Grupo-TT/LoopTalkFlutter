@@ -134,9 +134,10 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Username y tiempo
+                        // Username y fecha debajo
                         Expanded(
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 username,
@@ -146,19 +147,11 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                                   color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '•',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
-                                ),
-                              ),
-                              const SizedBox(width: 4),
+                              const SizedBox(height: 4),
                               Text(
                                 'Publicado $tiempoPublicacion',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 12,
                                   color: Colors.grey[600],
                                 ),
                               ),
@@ -218,11 +211,9 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                     // Métricas de engagement - botón alargado con like/dislike y botón separado de comentarios
                     Row(
                       children: [
-                        // Botón alargado con like y dislike
+                        // Botón alargado con like (sin dislike)
                         _buildLikeDislikeButton(),
                         const Spacer(),
-                        // Botón de comentarios a la derecha
-                        _buildCommentsButton(),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -314,7 +305,6 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
           future: _likesService.hasUserLiked(widget.topico.id!, _currentUserId!),
           builder: (context, likeSnapshot) {
             final isLiked = likeSnapshot.data ?? false;
-            
             return Container(
               height: 36,
               decoration: BoxDecoration(
@@ -322,66 +312,33 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.grey[800]!, width: 1.5),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Sección de like
-                  InkWell(
-                    onTap: () {
-                      _likesService.likePost(widget.topico.id!, _currentUserId!);
-                    },
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      bottomLeft: Radius.circular(8),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                            size: 18,
-                            color: isLiked ? Colors.blueAccent : Colors.grey[800],
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            likesCount.toString(),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isLiked ? Colors.blueAccent : Colors.grey[800],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Separador vertical
-                  Container(
-                    width: 1,
-                    height: 20,
-                    color: Colors.grey[300],
-                  ),
-                  // Sección de dislike
-                  InkWell(
-                    onTap: () {
-                      _likesService.dislikePost(widget.topico.id!, _currentUserId!);
-                    },
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(8),
-                      bottomRight: Radius.circular(8),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Icon(
-                        Icons.thumb_down_outlined,
+              child: InkWell(
+                onTap: () {
+                  _likesService.likePost(widget.topico.id!, _currentUserId!);
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
                         size: 18,
-                        color: Colors.grey[800],
+                        color: isLiked ? Colors.blueAccent : Colors.grey[800],
                       ),
-                    ),
+                      const SizedBox(width: 6),
+                      Text(
+                        likesCount.toString(),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isLiked ? Colors.blueAccent : Colors.grey[800],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             );
           },
@@ -390,49 +347,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
     );
   }
 
-  Widget _buildCommentsButton() {
-    return Container(
-      height: 36,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[800]!, width: 1.5),
-      ),
-      child: InkWell(
-        onTap: () {
-          // Scroll a comentarios o focus en input
-        },
-        borderRadius: BorderRadius.circular(8),
-              child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.chat_bubble_outline,
-                size: 18,
-                color: Colors.grey[800],
-              ),
-              const SizedBox(width: 6),
-              BlocBuilder<ComentarioBloc, ComentarioState>(
-                builder: (context, state) {
-                  final count = state is ComentarioLoaded ? state.respuestas.length : 0;
-                  return Text(
-                    count.toString(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[800],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // comments button removed — comments are displayed in the list and input is at the bottom
 
   Widget _buildCommentCard(Comentario comentario) {
     final autor = comentario.autor;
@@ -466,7 +381,8 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           username,
@@ -476,19 +392,11 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                             color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '•',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                        const SizedBox(width: 4),
+                        const SizedBox(height: 4),
                         Text(
                           tiempoPublicacion,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 12,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -529,7 +437,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                               _likeCounts[comentario.id!] = (likeCount + 1);
                             }
                           });
-                          
+                          // TODO: Llamar a la API cuando esté lista
                         }
                       : null,
                   child: Padding(
@@ -552,17 +460,6 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                         ),
                       ],
                     ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Icon(Icons.thumb_down_outlined, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 6),
-                Text(
-                  '12',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
