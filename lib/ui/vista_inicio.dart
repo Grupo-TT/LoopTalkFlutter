@@ -605,11 +605,11 @@ class _VistaInicioState extends State<VistaInicio> {
                 ),
                 const SizedBox(height: 12),
                 // Métricas de engagement
-                Row(
+                    Row(
                   children: [
                     _buildLikeButton(topico.id),
                     const SizedBox(width: 20),
-                    _buildEngagementMetric(Icons.chat_bubble_outline, '124'),
+                    _buildCommentAction(topico),
                     const Spacer(),
                     // Tag de categoría
                     Container(
@@ -706,6 +706,38 @@ class _VistaInicioState extends State<VistaInicio> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCommentAction(Topico topico) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VistaDetalleTopico(topico: topico),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 18, color: Colors.grey[600]),
+            const SizedBox(width: 6),
+            Text(
+              'Comentar',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
