@@ -437,7 +437,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                               _likeCounts[comentario.id!] = (likeCount + 1);
                             }
                           });
-                          // TODO: Llamar a la API cuando esté lista
+                    
                         }
                       : null,
                   child: Padding(
