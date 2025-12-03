@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../bloc/topico_bloc.dart';
+import '../bloc/topico_state.dart';
 import 'vista_login.dart';
 import 'vista_editar_perfil.dart';
 import 'vista_cambiar_password.dart';
@@ -100,30 +102,30 @@ class VistaPerfil extends StatelessWidget {
                                     size: 40,
                                     color: Colors.black,
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  usuario.nombre,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  usuario.correoElectronico,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
                             ),
-                          ),
-                    const SizedBox(height: 24),
-                    _buildStatsSection(),
+                            const SizedBox(height: 16),
+                            Text(
+                              usuario.nombre,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              usuario.correoElectronico,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildStatsSection(context, usuario.id),
                     const SizedBox(height: 32),
                     _buildSectionTitle('General'),
                     const SizedBox(height: 12),
@@ -381,33 +383,29 @@ class VistaPerfil extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsSection() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.chat_bubble_outline,
-            value: '34',
-            label: 'Loops Creados',
+  Widget _buildStatsSection(BuildContext context, int userId) {
+    return BlocBuilder<TopicoBloc, TopicoState>(
+      builder: (context, state) {
+        var value = '--';
+
+        if (state is TopicoLoaded) {
+          final userTopicos = state.topicos.where((t) => t.autor?.id == userId).length;
+          value = userTopicos.toString();
+        } else if (state is TopicoLoading || state is TopicoActionInProgress) {
+          value = '...';
+        }
+
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 220),
+            child: _buildStatCard(
+              icon: Icons.chat_bubble_outline,
+              value: value,
+              label: 'Loops Creados',
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.send_outlined,
-            value: '57',
-            label: 'Echos Enviados',
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.chat_bubble_outline,
-            value: '34',
-            label: 'Beads Creados',
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
