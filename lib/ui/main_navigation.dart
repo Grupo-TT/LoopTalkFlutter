@@ -8,6 +8,7 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'vista_inicio.dart';
 import 'vista_categorias.dart';
 import 'vista_perfil.dart';
+import 'vista_prueba.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../model/topico.dart';
@@ -74,6 +75,7 @@ class _MainNavigationState extends State<MainNavigation> {
               onNavigateToHome: _onNavigateToHome,
               isActive: _currentIndex == 1,
             ),
+            const VistaPrueba(),
           ]
         : [
             const VistaInicio(),
@@ -82,19 +84,21 @@ class _MainNavigationState extends State<MainNavigation> {
               onNavigateToHome: _onNavigateToHome,
               isActive: _currentIndex == 2,
             ),
+            const VistaPrueba(),
           ];
 
     final List<String> pageTitles = isEstudiante
-        ? ['Inicio', 'Perfil']
-        : ['Inicio', 'Categorías', 'Perfil'];
+        ? ['Inicio', 'Perfil', 'Prueba']
+        : ['Inicio', 'Categorías', 'Perfil', 'Prueba'];
 
     // Asegurar que _currentIndex está dentro del rango
     if (_currentIndex >= pages.length) {
       _currentIndex = 0;
     }
 
-    // Ocultar AppBar cuando estemos en la vista de perfil (última página) o inicio (índice 0)
-    final bool showAppBar = _currentIndex != 0 && _currentIndex != (pages.length - 1);
+    // Ocultar AppBar cuando estemos en la vista de perfil o inicio (índice 0)
+    // La última página (VistaPrueba) no tiene AppBar personalizado
+    final bool showAppBar = _currentIndex != 0 && _currentIndex != (pages.length - 2) && _currentIndex != (pages.length - 1);
 
     return Scaffold(
       appBar: showAppBar
@@ -176,11 +180,13 @@ class _MainNavigationState extends State<MainNavigation> {
                 ? [
                     _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: '', index: 0),
                     _buildNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: '', index: 1),
+                    _buildNavItem(icon: Icons.analytics_outlined, activeIcon: Icons.analytics, label: '', index: 2),
                   ]
                 : [
                     _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: '', index: 0),
                     _buildNavItem(icon: Icons.explore_outlined, activeIcon: Icons.explore, label: '', index: 1),
                     _buildNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: '', index: 2),
+                    _buildNavItem(icon: Icons.analytics_outlined, activeIcon: Icons.analytics, label: '', index: 3),
                   ],
         ),
       ),
