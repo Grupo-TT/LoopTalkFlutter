@@ -67,14 +67,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             e.toString().contains('Failed host lookup')) {
           message = 'No se pudo conectar al servidor. Verifica tu conexión.';
         } else if (e.toString().contains('400')) {
-          message = 'Error en el registro. Verifica los datos ingresados.';
+          message = 'El correo electrónico ya está en uso.';
         } else {
           message = e.toString().replaceFirst('Exception:', '').trim();
           if (message.isEmpty) {
             message = 'Error al registrar. Intenta nuevamente.';
           }
         }
-        emit(AuthFailure(message));
+        if (state is! AuthFailure) {
+          emit(AuthFailure(message));
+        }
       }
     });
 
