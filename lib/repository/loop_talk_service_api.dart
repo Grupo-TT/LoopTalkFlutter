@@ -78,7 +78,8 @@ class LoopTalkServiceApi {
       final data = jsonDecode(response.body);
       return Usuario.fromJson(data);
     } else {
-      throw Exception("Error en registro: ${response.statusCode}");
+      final errorBody = jsonDecode(response.body);
+      throw Exception("Error en registro: ${response.statusCode}. Detalles: ${errorBody['message'] ?? response.body}");
     }
   }
 

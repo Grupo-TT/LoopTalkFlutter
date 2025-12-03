@@ -64,10 +64,7 @@ class _VistaRegistrarState extends State<VistaRegistrar> {
             );
             Navigator.pop(context); // volver al login
           } else if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-             
-              SnackBar(content: Text(state.error),),
-            );
+            SnackBarHelper.showErrorMessage(context, state.error);
           }
         },
         builder: (context, state) {
