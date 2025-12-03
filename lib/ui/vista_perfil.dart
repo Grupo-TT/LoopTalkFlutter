@@ -407,122 +407,6 @@ class _VistaPerfilState extends State<VistaPerfil> {
     );
   }
 
-  void _eliminarCuenta(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (BuildContext dialogContext) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Icono de advertencia
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.warning_rounded,
-                    size: 32,
-                    color: Colors.red[600],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Título
-                const Text(
-                  '¿Eliminar tu cuenta?',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Descripción
-                Text(
-                  'Esta acción borrará tu cuenta y todos tus datos de forma permanente. No podrás recuperarlos después.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Botones
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: Colors.grey[300]!, width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Cancelar',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Funcionalidad de eliminar cuenta próximamente'),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[600],
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Eliminar',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildStatsSection(BuildContext context, int userId) {
     return BlocBuilder<TopicoBloc, TopicoState>(
       builder: (context, state) {
@@ -656,15 +540,6 @@ class _VistaPerfilState extends State<VistaPerfil> {
             title: 'Cerrar sesión',
             subtitle: 'Sal de la aplicación en este dispositivo',
             onTap: () => _cerrarSesion(context),
-            showDivider: true,
-          ),
-          _buildMenuItem(
-            icon: Icons.delete_outline,
-            title: 'Eliminar cuenta',
-            subtitle: 'Borra tu cuenta y todos tus datos',
-            titleColor: Colors.red,
-            iconColor: Colors.red,
-            onTap: () => _eliminarCuenta(context),
             showDivider: false,
           ),
         ],
