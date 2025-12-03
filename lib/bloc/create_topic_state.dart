@@ -13,11 +13,12 @@ class CreateTopicInProgress extends CreateTopicState {}
 
 class CreateTopicSuccess extends CreateTopicState {
   final Topico topico;
+  final bool isUpdate;
 
-  const CreateTopicSuccess({required this.topico});
+  const CreateTopicSuccess({required this.topico, this.isUpdate = false});
 
   @override
-  List<Object> get props => [topico];
+  List<Object> get props => [topico, isUpdate];
 }
 
 class CreateTopicFailure extends CreateTopicState {

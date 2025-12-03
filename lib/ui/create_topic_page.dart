@@ -13,9 +13,13 @@ import 'package:loop_talk/bloc/create_topic_bloc.dart';
 import 'package:loop_talk/model/categoria.dart';
 import 'package:loop_talk/bloc/topico_bloc.dart';
 import 'package:loop_talk/bloc/topico_event.dart';
+import 'package:loop_talk/model/topico.dart';
+import 'package:loop_talk/components/snackbar_helper.dart';
 
 class CreateTopicPage extends StatelessWidget {
-  const CreateTopicPage({super.key});
+  final Topico? initialTopico;
+
+  const CreateTopicPage({super.key, this.initialTopico});
 
   @override
   Widget build(BuildContext context) {
@@ -24,25 +28,24 @@ class CreateTopicPage extends StatelessWidget {
       body: BlocListener<CreateTopicBloc, CreateTopicState>(
         listener: (context, state) {
           if (state is CreateTopicSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Tópico creado con éxito')),
-            );
+            final message = state.isUpdate ? 'Tópico actualizado con éxito' : 'Tópico creado con éxito';
+            SnackBarHelper.showSuccesssMessage(context, message);
             context.read<TopicoBloc>().add(LoadTopicos());
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(state.topico);
           } else if (state is CreateTopicFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.error}')),
-            );
+            SnackBarHelper.showErrorMessage(context, 'Error: ${state.error}');
           }
         },
-        child: const CreateTopicForm(),
+        child: CreateTopicForm(initialTopico: initialTopico),
       ),
     );
   }
 }
 
 class CreateTopicForm extends StatefulWidget {
-  const CreateTopicForm({super.key});
+  final Topico? initialTopico;
+
+  const CreateTopicForm({super.key, this.initialTopico});
 
   @override
   State<CreateTopicForm> createState() => _CreateTopicFormState();
@@ -59,12 +62,19 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
   Categoria? _selectedCategoria;
   List<Categoria> _filteredCategorias = [];
   List<Categoria> _allCategorias = [];
+  bool get _isEditMode => widget.initialTopico != null;
 
   @override
   void initState() {
     super.initState();
     context.read<CategoriaBloc>().add(LoadCategorias());
     _categorySearchController.addListener(_filterCategorias);
+    final initial = widget.initialTopico;
+    if (initial != null) {
+      _titleController.text = initial.titulo;
+      _messageController.text = initial.mensaje;
+      _selectedCategoria = initial.curso;
+    }
     _initConnectivity();
   }
 
@@ -147,7 +157,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
         children: [
           ColoredBox(
             color: Colors.white,
-            child: Column(
+        child: Column(
               children: [
                 // Header con usuario
                 _buildUserHeader(),
@@ -532,8 +542,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                 icon: const Icon(Icons.add_photo_alternate, color: Colors.black87),
                 onPressed: () {
                   
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Funcionalidad de imagen próximamente')),
+                  SnackBarHelper.showInfoMessage(
+                    context,
+                    'Funcionalidad de imagen próximamente',
                   );
                 },
               ),
@@ -543,6 +554,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
             BlocBuilder<CreateTopicBloc, CreateTopicState>(
               builder: (context, state) {
                 final isLoading = state is CreateTopicInProgress;
+                final buttonLabel = _isEditMode ? 'Guardar' : 'Publicar';
                 return SizedBox(
                   width: 120,
                   height: 50,
@@ -552,20 +564,39 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                         : () {
                             if (_formKey.currentState?.validate() ?? false) {
                               if (_selectedCategoria == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Por favor selecciona una categoría'),
-                                  ),
+                                SnackBarHelper.showErrorMessage(
+                                  context,
+                                  'Por favor selecciona una categoría',
                                 );
                                 return;
                               }
-                              context.read<CreateTopicBloc>().add(
-                                    CreateTopicSubmitted(
-                                      titulo: _titleController.text,
-                                      mensaje: _messageController.text,
-                                      idCurso: _selectedCategoria!.id!,
-                                    ),
+                              if (_isEditMode) {
+                                final topicoId = widget.initialTopico?.id;
+                                if (topicoId == null) {
+                                  SnackBarHelper.showErrorMessage(
+                                    context,
+                                    'No se puede editar este tópico.',
                                   );
+                                  return;
+                                }
+                                context.read<CreateTopicBloc>().add(
+                                      UpdateTopicSubmitted(
+                                        topicoId: topicoId,
+                                        titulo: _titleController.text,
+                                        mensaje: _messageController.text,
+                                        idCurso: _selectedCategoria!.id!,
+                                        estado: widget.initialTopico?.estado,
+                                      ),
+                                    );
+                              } else {
+                                context.read<CreateTopicBloc>().add(
+                                      CreateTopicSubmitted(
+                                        titulo: _titleController.text,
+                                        mensaje: _messageController.text,
+                                        idCurso: _selectedCategoria!.id!,
+                                      ),
+                                    );
+                              }
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -585,9 +616,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text(
-                            'Publicar',
-                            style: TextStyle(
+                        : Text(
+                            buttonLabel,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

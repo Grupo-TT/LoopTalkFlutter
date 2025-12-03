@@ -8,6 +8,7 @@ import 'vista_categorias.dart';
 import 'vista_perfil.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
+import '../model/topico.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -81,7 +82,7 @@ class _MainNavigationState extends State<MainNavigation> {
           ? FloatingActionButton(
               onPressed: () {
                 final topicoBloc = context.read<TopicoBloc>();
-                Navigator.push(
+                Navigator.push<Topico?>(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CreateTopicPage(),
