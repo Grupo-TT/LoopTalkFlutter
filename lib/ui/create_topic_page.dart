@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,6 +53,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
   final _titleController = TextEditingController();
   final _messageController = TextEditingController();
   final _categorySearchController = TextEditingController();
+  final Connectivity _connectivity = Connectivity();
+  StreamSubscription<ConnectivityResult>? _connectivitySub;
+  bool _isOffline = false;
   Categoria? _selectedCategoria;
   List<Categoria> _filteredCategorias = [];
   List<Categoria> _allCategorias = [];
@@ -59,6 +65,23 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
     super.initState();
     context.read<CategoriaBloc>().add(LoadCategorias());
     _categorySearchController.addListener(_filterCategorias);
+    _initConnectivity();
+  }
+
+  Future<void> _initConnectivity() async {
+    final result = await _connectivity.checkConnectivity();
+    _updateOfflineStatus(result);
+    _connectivitySub = _connectivity.onConnectivityChanged.listen(_updateOfflineStatus);
+  }
+
+  void _updateOfflineStatus(ConnectivityResult result) {
+    final isOffline = result == ConnectivityResult.none;
+    if (!mounted || _isOffline == isOffline) {
+      return;
+    }
+    setState(() {
+      _isOffline = isOffline;
+    });
   }
 
   void _filterCategorias() {
@@ -120,40 +143,106 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
   Widget build(BuildContext context) {
     return SafeArea(
       bottom: false,
-      child: ColoredBox(
-        color: Colors.white,
-        child: Column(
-          children: [
-            // Header con usuario
-            _buildUserHeader(),
-            // Contenido scrollable
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      // Campo de título
-                      _buildTitleField(),
-                      const SizedBox(height: 16),
-                      // Campo de descripción
-                      _buildDescriptionField(),
-                      const SizedBox(height: 32),
-                      // Sección de categorías
-                      _buildCategorySection(),
-                      const SizedBox(height: 100), // Espacio para los botones inferiores
-                    ],
+      child: Stack(
+        children: [
+          ColoredBox(
+            color: Colors.white,
+            child: Column(
+              children: [
+                // Header con usuario
+                _buildUserHeader(),
+                // Contenido scrollable
+                Expanded(
+                  child: Form(
+                    key: _formKey,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
+                          // Campo de título
+                          _buildTitleField(),
+                          const SizedBox(height: 16),
+                          // Campo de descripción
+                          _buildDescriptionField(),
+                          const SizedBox(height: 32),
+                          // Sección de categorías
+                          _buildCategorySection(),
+                          const SizedBox(height: 100), // Espacio para los botones inferiores
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Botones inferiores
+                _buildBottomActions(),
+              ],
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: !_isOffline,
+              child: AnimatedOpacity(
+                opacity: _isOffline ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.55),
+                  ),
+                  child: Center(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 16,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children:  [
+                          Icon(
+                            Icons.wifi_off_rounded,
+                            size: 48,
+                            color: Colors.black87,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Sin conexión',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Reintentando...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 24),
+                           CircularProgressIndicator(
+                            strokeWidth: 3,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-            // Botones inferiores
-            _buildBottomActions(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -515,6 +604,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
 
   @override
   void dispose() {
+    _connectivitySub?.cancel();
     _titleController.dispose();
     _messageController.dispose();
     _categorySearchController.dispose();
