@@ -49,40 +49,52 @@ class _VistaPruebaState extends State<VistaPrueba> {
                     context.read<TopicoBloc>().add(LoadTopicos());
                   },
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 8),
                         const Text(
                           'Estadísticas',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
+                            letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Resumen de tu actividad en LoopTalk',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
                         _buildStatsSection(context, usuario.id),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
                         _buildSectionTitle('Actividad'),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         _buildTimelineSection(context, usuario.id),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
                         _buildSectionTitle('Escritura'),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         _buildWordsSection(context, usuario.id),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
                         _buildSectionTitle('Categorías'),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         _buildCategoryDistributionSection(context, usuario.id),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
                         _buildSectionTitle('Engagement'),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         _buildEngagementSection(context, usuario.id),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 28),
                         _buildSectionTitle('Actividad reciente'),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         _buildRecentActivitySection(context, usuario.id),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -131,30 +143,46 @@ class _VistaPruebaState extends State<VistaPrueba> {
     required String label,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Icon(icon, size: 24, color: Colors.black),
-          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 28, color: Colors.black87),
+          ),
+          const SizedBox(height: 16),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Colors.black87,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w400,
+              fontSize: 13,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
             maxLines: 2,
@@ -167,10 +195,11 @@ class _VistaPruebaState extends State<VistaPrueba> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: Colors.grey[500],
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Colors.black87,
+        letterSpacing: -0.3,
       ),
     );
   }
@@ -182,8 +211,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: CircularProgressIndicator(strokeWidth: 2),
@@ -197,16 +234,44 @@ class _VistaPruebaState extends State<VistaPrueba> {
 
         if (userTopicos.isEmpty) {
           return Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: const Center(
-              child: Text(
-                'Aún no has creado loops. Comparte tu primera idea para ver aquí tu actividad.',
-                style: TextStyle(fontSize: 13, color: Colors.black54),
-                textAlign: TextAlign.center,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.insights, size: 48, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Aún no has creado loops',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Comparte tu primera idea para ver aquí tu actividad.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           );
@@ -215,45 +280,60 @@ class _VistaPruebaState extends State<VistaPrueba> {
         final timelineEntries = _buildMonthlyTimeline(userTopicos);
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!, width: 1),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[200]!, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Loops por mes',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+              const Row(
+                children: [
+                  Icon(Icons.timeline, size: 20, color: Colors.black87),
+                   SizedBox(width: 8),
+                   Text(
+                    'Loops por mes',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              ...timelineEntries.map(
+              const SizedBox(height: 20),
+              ...timelineEntries.asMap().entries.map(
                 (entry) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: EdgeInsets.only(bottom: entry.key < timelineEntries.length - 1 ? 14 : 0),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          entry.period,
+                          entry.value.period,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 15,
                             color: Colors.black87,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.black87,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          '${entry.count}',
+                          '${entry.value.count}',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -326,8 +406,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: CircularProgressIndicator(strokeWidth: 2),
@@ -343,8 +431,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: Text(
@@ -359,35 +455,53 @@ class _VistaPruebaState extends State<VistaPrueba> {
         final wordsStats = _calculateWordsStats(userTopicos);
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!, width: 1),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[200]!, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Estadísticas de escritura',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+              const Row(
+                children: [
+                  Icon(Icons.edit_note, size: 20, color: Colors.black87),
+                   SizedBox(width: 8),
+                   Text(
+                    'Estadísticas de escritura',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _buildWordsStatRow(
                 label: 'Total de palabras',
                 value: '${wordsStats.totalWords}',
                 icon: Icons.text_fields,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              Divider(height: 1, color: Colors.grey[200]),
+              const SizedBox(height: 16),
               _buildWordsStatRow(
                 label: 'Promedio por loop',
                 value: '${wordsStats.averageWords}',
                 icon: Icons.bar_chart,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              Divider(height: 1, color: Colors.grey[200]),
+              const SizedBox(height: 16),
               _buildWordsStatRow(
                 label: 'Loop más largo',
                 value: '${wordsStats.maxWords} palabras',
@@ -407,21 +521,29 @@ class _VistaPruebaState extends State<VistaPrueba> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.black87),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: Colors.black87),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             label,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               color: Colors.black87,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
@@ -466,8 +588,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: CircularProgressIndicator(strokeWidth: 2),
@@ -483,8 +613,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: Text(
@@ -502,8 +640,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: Text(
@@ -516,33 +662,47 @@ class _VistaPruebaState extends State<VistaPrueba> {
         }
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!, width: 1),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey[200]!, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Loops por categoría',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+              const  Row(
+                children: [
+                  Icon(Icons.category, size: 20, color: Colors.black87),
+                   SizedBox(width: 8),
+                 Text(
+                    'Loops por categoría',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 10,
+                runSpacing: 10,
                 children: categoryStats.map(
                   (stat) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey[300]!, width: 1),
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.grey[200]!, width: 1.5),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -550,17 +710,17 @@ class _VistaPruebaState extends State<VistaPrueba> {
                         Text(
                           stat.categoryName,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
                             color: Colors.black87,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             '${stat.count}',
@@ -619,8 +779,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: CircularProgressIndicator(strokeWidth: 2),
@@ -636,8 +804,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: Text(
@@ -686,29 +862,45 @@ class _VistaPruebaState extends State<VistaPrueba> {
             final stats = snapshot.data ?? _EngagementStats(likes: 0, comments: 0);
 
             return Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!, width: 1),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey[200]!, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Interacción recibida',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+                  const  Row(
+                    children: [
+                      Icon(Icons.favorite, size: 20, color: Colors.black87),
+                       SizedBox(width: 8),
+                       Text(
+                        'Interacción recibida',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   _buildEngagementRow(
                     icon: Icons.thumb_up_outlined,
                     label: 'Likes recibidos',
                     value: '${stats.likes}',
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  Divider(height: 1, color: Colors.grey[200]),
+                  const SizedBox(height: 16),
                   _buildEngagementRow(
                     icon: Icons.chat_bubble_outline,
                     label: 'Comentarios recibidos',
@@ -730,21 +922,29 @@ class _VistaPruebaState extends State<VistaPrueba> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.black87),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: Colors.black87),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             label,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               color: Colors.black87,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
         Text(
           value,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
@@ -797,8 +997,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: CircularProgressIndicator(strokeWidth: 2),
@@ -814,8 +1022,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!, width: 1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Center(
               child: Text(
@@ -850,29 +1066,46 @@ class _VistaPruebaState extends State<VistaPrueba> {
             );
 
             return Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!, width: 1),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey[200]!, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Resumen de actividad',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+                  const Row(
+                    children: [
+                      Icon(Icons.update, size: 20, color: Colors.black87),
+                       SizedBox(width: 8),
+                       Text(
+                        'Resumen de actividad',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   if (activityInfo.loopsThisWeek > 0)
                     _buildActivityRow(
                       icon: Icons.calendar_today,
                       text: 'Has creado ${activityInfo.loopsThisWeek} loop${activityInfo.loopsThisWeek == 1 ? '' : 's'} esta semana',
                     ),
-                  if (activityInfo.loopsThisWeek > 0) const SizedBox(height: 12),
+                  if (activityInfo.loopsThisWeek > 0) const SizedBox(height: 16),
+                  if (activityInfo.loopsThisWeek > 0)
+                    Divider(height: 1, color: Colors.grey[200]),
+                  if (activityInfo.loopsThisWeek > 0) const SizedBox(height: 16),
                   _buildActivityRow(
                     icon: Icons.access_time,
                     text: _buildLastLoopText(activityInfo.lastLoopDays, activityInfo.lastLoopDate),
@@ -892,14 +1125,22 @@ class _VistaPruebaState extends State<VistaPrueba> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.black87),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: Colors.black87),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               color: Colors.black87,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
