@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -36,9 +38,26 @@ jobs:
           keyAlias=${{ secrets.KEY_ALIAS }}
           storeFile=upload-keystore.jks
           EOF
-
+      - name: Increment build number
+        run: |
+          CURRENT_VERSION=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+' pubspec.yaml)
+          VERSION_NAME=$(echo $CURRENT_VERSION | cut -d'+' -f1)
+          BUILD_NUMBER=$(echo $CURRENT_VERSION | cut -d'+' -f2)
+          NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+          sed -i "s/version: $CURRENT_VERSION/version: $VERSION_NAME+$NEW_BUILD_NUMBER/" pubspec.yaml
+          echo "Nueva versión: $VERSION_NAME+$NEW_BUILD_NUMBER"
+          echo "NEW_VERSION=$VERSION_NAME+$NEW_BUILD_NUMBER" >> $GITHUB_ENV
+      
       - name: Run tests
         run: flutter test   
+        
+      - name: Commit version change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore: bump build number to ${{ env.NEW_VERSION }}"
+          git push
 
       - name: Build APK (release)
         run: flutter build apk --release
