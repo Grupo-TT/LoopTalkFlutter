@@ -5,8 +5,6 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../bloc/topico_bloc.dart';
-import '../bloc/topico_state.dart';
 import 'vista_login.dart';
 import 'vista_editar_perfil.dart';
 import 'vista_cambiar_password.dart';
@@ -156,9 +154,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      _buildStatsSection(context, usuario.id),
-                    const SizedBox(height: 32),
+                      const SizedBox(height: 32),
                     _buildSectionTitle('General'),
                     const SizedBox(height: 12),
                     _buildGeneralSection(context),
@@ -404,71 +400,6 @@ class _VistaPerfilState extends State<VistaPerfil> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildStatsSection(BuildContext context, int userId) {
-    return BlocBuilder<TopicoBloc, TopicoState>(
-      builder: (context, state) {
-        var value = '--';
-
-        if (state is TopicoLoaded) {
-          final userTopicos = state.topicos.where((t) => t.autor?.id == userId).length;
-          value = userTopicos.toString();
-        } else if (state is TopicoLoading || state is TopicoActionInProgress) {
-          value = '...';
-        }
-
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 220),
-            child: _buildStatCard(
-              icon: Icons.chat_bubble_outline,
-              value: value,
-              label: 'Loops Creados',
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 24, color: Colors.black),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w400,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-          ),
-        ],
-      ),
     );
   }
 
