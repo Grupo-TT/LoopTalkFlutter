@@ -20,10 +20,14 @@ class MainNavigation extends StatefulWidget {
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-  static const _tutorialPrefKey = 'tutorial_create_loop_shown';
+  static const _tutorialPrefKeyCreateLoop = 'tutorial_create_loop_shown';
+  static const _tutorialPrefKeyCreateCategory = 'tutorial_create_category_shown';
+
   int _currentIndex = 0;
   final GlobalKey _fabKey = GlobalKey();
+  final GlobalKey _categoryFabKey = GlobalKey();
   bool _tutorialAlreadySeen = false;
+  bool _categoryTutorialSeen = false;
   bool _isCheckingTutorial = false;
 
   @override
@@ -36,7 +40,9 @@ class _MainNavigationState extends State<MainNavigation> {
     if (_isCheckingTutorial) return;
     _isCheckingTutorial = true;
     final prefs = await SharedPreferences.getInstance();
-    _tutorialAlreadySeen = prefs.getBool(_tutorialPrefKey) ?? false;
+    final userId = _currentUserId();
+    _tutorialAlreadySeen = prefs.getBool('${_tutorialPrefKeyCreateLoop}_$userId') ?? false;
+    _categoryTutorialSeen = prefs.getBool('${_tutorialPrefKeyCreateCategory}_$userId') ?? false;
     _isCheckingTutorial = false;
     if (!_tutorialAlreadySeen && mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
@@ -64,12 +70,18 @@ class _MainNavigationState extends State<MainNavigation> {
     final List<Widget> pages = isEstudiante
         ? [
             const VistaInicio(),
-            VistaPerfil(onNavigateToHome: _onNavigateToHome),
+            VistaPerfil(
+              onNavigateToHome: _onNavigateToHome,
+              isActive: _currentIndex == 1,
+            ),
           ]
         : [
             const VistaInicio(),
-            const VistaCategorias(),
-            VistaPerfil(onNavigateToHome: _onNavigateToHome),
+            VistaCategorias(tutorialFabKey: _categoryFabKey),
+            VistaPerfil(
+              onNavigateToHome: _onNavigateToHome,
+              isActive: _currentIndex == 2,
+            ),
           ];
 
     final List<String> pageTitles = isEstudiante
@@ -143,9 +155,13 @@ class _MainNavigationState extends State<MainNavigation> {
             setState(() {
               _currentIndex = index;
             });
-            if (index == 0) {
-              WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
-            }
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_currentIndex == 0) {
+                _maybeShowTutorial();
+              } else if (!isEstudiante && _currentIndex == 1) {
+                _maybeShowCategoryTutorial();
+              }
+            });
           },
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
@@ -202,29 +218,61 @@ class _MainNavigationState extends State<MainNavigation> {
         contents: [
           TargetContent(
             align: ContentAlign.top,
-            builder: (context, controller) => _buildTutorialContent(() {
-              controller.next();
-            }),
+            builder: (context, controller) => _buildTutorialContent(
+              title: 'Crea tu primer Loop',
+              description: 'Toca este botón para compartir una idea o iniciar una conversación.',
+              onNext: controller.next,
+            ),
           ),
         ],
       ),
     ];
 
-    final tutorial = TutorialCoachMark(
+    _showCoachMark(
       targets: targets,
-      colorShadow: Colors.black.withValues(alpha: 0.75),
-      textSkip: 'Saltar',
-      paddingFocus: 8,
-      onFinish: _markTutorialSeen,
-      onSkip: () {
-        _markTutorialSeen();
-        return true;
-      },
+      onFinished: () => _markTutorialSeen(_tutorialPrefKeyCreateLoop),
     );
-    tutorial.show(context: context);
   }
 
-  Widget _buildTutorialContent(VoidCallback onNext) {
+  void _maybeShowCategoryTutorial() {
+    if (!mounted || _currentIndex != 1 || _categoryTutorialSeen) {
+      return;
+    }
+    if (_categoryFabKey.currentContext == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowCategoryTutorial());
+      return;
+    }
+
+    final targets = <TargetFocus>[
+      TargetFocus(
+        identify: 'create_category_fab',
+        keyTarget: _categoryFabKey,
+        alignSkip: Alignment.topRight,
+        shape: ShapeLightFocus.Circle,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) => _buildTutorialContent(
+              title: 'Crea una categoría',
+              description: 'Como moderador puedes agregar nuevas categorías para organizar los Loops.',
+              onNext: controller.next,
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    _showCoachMark(
+      targets: targets,
+      onFinished: () => _markTutorialSeen(_tutorialPrefKeyCreateCategory),
+    );
+  }
+
+  Widget _buildTutorialContent({
+    required String title,
+    required String description,
+    required VoidCallback onNext,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -242,18 +290,18 @@ class _MainNavigationState extends State<MainNavigation> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Crea tu primer Loop',
-            style: TextStyle(
+          Text(
+            title,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Toca este botón para compartir una idea o iniciar una conversación.',
-            style: TextStyle(
+          Text(
+            description,
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.black54,
               height: 1.4,
@@ -272,10 +320,39 @@ class _MainNavigationState extends State<MainNavigation> {
     );
   }
 
-  void _markTutorialSeen() async {
-    if (_tutorialAlreadySeen) return;
-    _tutorialAlreadySeen = true;
+  void _showCoachMark({
+    required List<TargetFocus> targets,
+    required VoidCallback onFinished,
+  }) {
+    TutorialCoachMark(
+      targets: targets,
+      colorShadow: Colors.black.withValues(alpha: 0.75),
+      textSkip: 'Saltar',
+      paddingFocus: 8,
+      onFinish: onFinished,
+      onSkip: () {
+        onFinished();
+        return true;
+      },
+    ).show(context: context);
+  }
+
+  void _markTutorialSeen(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_tutorialPrefKey, true);
+    final userId = _currentUserId();
+    await prefs.setBool('${key}_$userId', true);
+    if (key == _tutorialPrefKeyCreateLoop) {
+      _tutorialAlreadySeen = true;
+    } else if (key == _tutorialPrefKeyCreateCategory) {
+      _categoryTutorialSeen = true;
+    }
+  }
+
+  String _currentUserId() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthSuccess) {
+      return authState.usuario.id.toString();
+    }
+    return 'guest';
   }
 }

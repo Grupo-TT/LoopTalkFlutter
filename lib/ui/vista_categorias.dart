@@ -7,7 +7,9 @@ import '../bloc/categoria_state.dart';
 import '../model/categoria.dart';
 
 class VistaCategorias extends StatefulWidget {
-  const VistaCategorias({super.key});
+  final GlobalKey? tutorialFabKey;
+
+  const VistaCategorias({super.key, this.tutorialFabKey});
 
   @override
   State<VistaCategorias> createState() => _VistaCategoriasState();
@@ -29,6 +31,7 @@ class _VistaCategoriasState extends State<VistaCategorias> {
           bottom: 70.0,
         ), // 💜 lo sube para que no se tape
         child: FloatingActionButton(
+          key: widget.tutorialFabKey,
           backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
           child: const Icon(Icons.add, color: Colors.white),

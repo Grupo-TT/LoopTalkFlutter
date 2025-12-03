@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -9,19 +11,51 @@ import 'vista_login.dart';
 import 'vista_editar_perfil.dart';
 import 'vista_cambiar_password.dart';
 
-class VistaPerfil extends StatelessWidget {
+class VistaPerfil extends StatefulWidget {
   final VoidCallback? onNavigateToHome;
+  final bool isActive;
 
-  const VistaPerfil({super.key, this.onNavigateToHome});
+  const VistaPerfil({super.key, this.onNavigateToHome, this.isActive = false});
+
+  @override
+  State<VistaPerfil> createState() => _VistaPerfilState();
+}
+
+class _VistaPerfilState extends State<VistaPerfil> {
+  static const _tutorialProfileKey = 'tutorial_profile_shown';
+  final GlobalKey _editProfileKey = GlobalKey();
+  bool _profileTutorialSeen = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileTutorial();
+  }
+
+  @override
+  void didUpdateWidget(covariant VistaPerfil oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_profileTutorialSeen && widget.isActive && !oldWidget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+    }
+  }
+
+  Future<void> _loadProfileTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = _currentUserId();
+    final seen = prefs.getBool('${_tutorialProfileKey}_$userId') ?? false;
+    _profileTutorialSeen = seen;
+    if (!seen && widget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.error)));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
         }
       },
       child: Scaffold(
@@ -57,9 +91,7 @@ class VistaPerfil extends StatelessWidget {
                                 size: 20,
                               ),
                               onPressed: () {
-                                if (onNavigateToHome != null) {
-                                  onNavigateToHome!();
-                                }
+                                widget.onNavigateToHome?.call();
                               },
                             ),
                           ),
@@ -150,6 +182,114 @@ class VistaPerfil extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _maybeShowProfileTutorial() {
+    if (!mounted || _profileTutorialSeen || !widget.isActive) {
+      return;
+    }
+    if (_editProfileKey.currentContext == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+      return;
+    }
+
+    final targets = [
+      TargetFocus(
+        identify: 'edit_profile_item',
+        keyTarget: _editProfileKey,
+        alignSkip: Alignment.topRight,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) => _buildProfileTutorialContent(
+              title: 'Personaliza tu perfil',
+              description: 'Aquí puedes editar tu perfil cuando lo necesites.',
+              onNext: controller.next,
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    TutorialCoachMark(
+      targets: targets,
+      colorShadow: Colors.black.withValues(alpha: 0.75),
+      textSkip: 'Saltar',
+      paddingFocus: 8,
+      onFinish: _markProfileTutorialSeen,
+      onSkip: () {
+        _markProfileTutorialSeen();
+        return true;
+      },
+    ).show(context: context);
+  }
+
+  Widget _buildProfileTutorialContent({
+    required String title,
+    required String description,
+    required VoidCallback onNext,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: onNext,
+              child: const Text('Entendido'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _markProfileTutorialSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = _currentUserId();
+    await prefs.setBool('${_tutorialProfileKey}_$userId', true);
+    _profileTutorialSeen = true;
+  }
+
+  String _currentUserId() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthSuccess) {
+      return authState.usuario.id.toString();
+    }
+    return 'guest';
   }
 
   void _cerrarSesion(BuildContext context) {
@@ -468,6 +608,7 @@ class VistaPerfil extends StatelessWidget {
       child: Column(
         children: [
           _buildMenuItem(
+            itemKey: _editProfileKey,
             icon: Icons.person_outline,
             title: 'Editar Perfil',
             subtitle: 'Actualiza tu foto, nombre o correo',
@@ -532,6 +673,7 @@ class VistaPerfil extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
+    Key? itemKey,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -543,6 +685,7 @@ class VistaPerfil extends StatelessWidget {
     return Column(
       children: [
         InkWell(
+          key: itemKey,
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
