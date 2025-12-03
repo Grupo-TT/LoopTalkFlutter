@@ -4,67 +4,96 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../bloc/topico_bloc.dart';
+import '../bloc/topico_event.dart';
 import '../bloc/topico_state.dart';
 import '../model/topico.dart';
+import '../model/comentario.dart';
 import '../services/firebase_likes_service.dart';
 import '../repository/comentario_service.dart';
 
-class VistaPrueba extends StatelessWidget {
+class VistaPrueba extends StatefulWidget {
   const VistaPrueba({super.key});
+
+  @override
+  State<VistaPrueba> createState() => _VistaPruebaState();
+}
+
+class _VistaPruebaState extends State<VistaPrueba> {
+  @override
+  void initState() {
+    super.initState();
+    // Cargar los tópicos cuando se abre la vista
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TopicoBloc>().add(LoadTopicos());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state is AuthSuccess) {
-              final usuario = state.usuario;
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Estadísticas',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildStatsSection(context, usuario.id),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Actividad'),
-                    const SizedBox(height: 12),
-                    _buildTimelineSection(context, usuario.id),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Escritura'),
-                    const SizedBox(height: 12),
-                    _buildWordsSection(context, usuario.id),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Categorías'),
-                    const SizedBox(height: 12),
-                    _buildCategoryDistributionSection(context, usuario.id),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Engagement'),
-                    const SizedBox(height: 12),
-                    _buildEngagementSection(context, usuario.id),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Actividad reciente'),
-                    const SizedBox(height: 12),
-                    _buildRecentActivitySection(context, usuario.id),
-                  ],
-                ),
-              );
-            } else {
-              return const Center(
-                child: Text('No hay usuario autenticado'),
-              );
+        child: BlocListener<TopicoBloc, TopicoState>(
+          listener: (context, state) {
+            // Forzar rebuild cuando cambian los tópicos
+            if (state is TopicoLoaded || state is TopicoActionSuccess) {
+              setState(() {});
             }
           },
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is AuthSuccess) {
+                final usuario = state.usuario;
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<TopicoBloc>().add(LoadTopicos());
+                  },
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Estadísticas',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        _buildStatsSection(context, usuario.id),
+                        const SizedBox(height: 32),
+                        _buildSectionTitle('Actividad'),
+                        const SizedBox(height: 12),
+                        _buildTimelineSection(context, usuario.id),
+                        const SizedBox(height: 32),
+                        _buildSectionTitle('Escritura'),
+                        const SizedBox(height: 12),
+                        _buildWordsSection(context, usuario.id),
+                        const SizedBox(height: 32),
+                        _buildSectionTitle('Categorías'),
+                        const SizedBox(height: 12),
+                        _buildCategoryDistributionSection(context, usuario.id),
+                        const SizedBox(height: 32),
+                        _buildSectionTitle('Engagement'),
+                        const SizedBox(height: 12),
+                        _buildEngagementSection(context, usuario.id),
+                        const SizedBox(height: 32),
+                        _buildSectionTitle('Actividad reciente'),
+                        const SizedBox(height: 12),
+                        _buildRecentActivitySection(context, usuario.id),
+                      ],
+                    ),
+                  ),
+                );
+              } else {
+                return const Center(
+                  child: Text('No hay usuario autenticado'),
+                );
+              }
+            },
+          ),
         ),
       ),
     );
@@ -504,48 +533,48 @@ class VistaPrueba extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              ...categoryStats.map(
-                (stat) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              stat.categoryName,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black87,
-                              ),
-                            ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: categoryStats.map(
+                  (stat) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey[300]!, width: 1),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          stat.categoryName,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
                           ),
-                          Text(
-                            '${stat.count} loop${stat.count == 1 ? '' : 's'}',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: stat.percentage / 100,
-                          minHeight: 6,
-                          backgroundColor: Colors.grey[200],
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.black87),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${stat.count}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ).toList(),
               ),
             ],
           ),
@@ -621,6 +650,7 @@ class VistaPrueba extends StatelessWidget {
         }
 
         return FutureBuilder<_EngagementStats>(
+          key: ValueKey('engagement_${userTopicos.length}_${userTopicos.map((t) => t.id).join(',')}'),
           future: _calculateEngagementStats(userTopicos),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -733,10 +763,13 @@ class VistaPrueba extends StatelessWidget {
     for (final topico in topicos) {
       if (topico.id == null) continue;
 
-      // Obtener likes
+      // Obtener likes (usar el valor actual del stream)
       try {
         final likesStream = likesService.getLikesCount(topico.id!);
-        final likesSnapshot = await likesStream.first;
+        final likesSnapshot = await likesStream.first.timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => 0,
+        );
         totalLikes += likesSnapshot;
       } catch (e) {
         // Si hay error, continuar con el siguiente
@@ -744,7 +777,10 @@ class VistaPrueba extends StatelessWidget {
 
       // Obtener comentarios
       try {
-        final comentarios = await comentarioService.obtenerRespuestas(topico.id!);
+        final comentarios = await comentarioService.obtenerRespuestas(topico.id!).timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => <Comentario>[],
+        );
         totalComments += comentarios.length;
       } catch (e) {
         // Si hay error, continuar con el siguiente
