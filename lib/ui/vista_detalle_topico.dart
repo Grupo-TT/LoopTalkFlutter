@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../model/topico.dart';
 import '../model/comentario.dart';
+import '../model/usuario.dart';
 import '../services/firebase_likes_service.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../bloc/comentario_bloc.dart';
 import '../bloc/comentario_event.dart';
 import '../bloc/comentario_state.dart';
+import '../bloc/topico_bloc.dart';
+import '../bloc/topico_event.dart';
+import '../bloc/topico_state.dart';
 import '../repository/comentario_service.dart';
+import '../utils/permission_utils.dart';
+import 'create_topic_page.dart';
+import '../components/snackbar_helper.dart';
 import 'dart:developer';
 
 class VistaDetalleTopico extends StatefulWidget {
@@ -30,20 +37,25 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
   // Comentarios serán gestionados por ComentarioBloc
   final FirebaseLikesService _likesService = FirebaseLikesService();
   String? _currentUserId;
+  Usuario? _currentUser;
+  late Topico _topicoActual;
+  int? _pendingDeleteId;
 
   @override
   void initState() {
     super.initState();
+    _topicoActual = widget.topico;
     
     // Obtener userId del AuthBloc
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthSuccess) {
+      _currentUser = authState.usuario;
       _currentUserId = authState.usuario.id.toString();
     }
     
     // Inicializar post en Firebase
-    if (widget.topico.id != null) {
-      _likesService.initializePost(widget.topico.id!);
+    if (_topicoActual.id != null) {
+      _likesService.initializePost(_topicoActual.id!);
     }
     
     // Comentarios se cargarán mediante ComentarioBloc creado en build
@@ -75,37 +87,53 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
 
   @override
   Widget build(BuildContext context) {
-    final autor = widget.topico.autor;
+    final autor = _topicoActual.autor;
     final username = autor != null
         ? '@${autor.nombre.replaceAll(' ', '_')}'
         : '@Usuario';
-    final tiempoPublicacion = _formatTimeAgo(widget.topico.fechaCreacion);
-    final categoria = widget.topico.curso?.nombre ?? 'General';
+    final tiempoPublicacion = _formatTimeAgo(_topicoActual.fechaCreacion);
+    final categoria = _topicoActual.curso?.nombre ?? 'General';
+    final canEdit = canEditTopico(currentUser: _currentUser, topico: _topicoActual);
+    final canDelete = canDeleteTopico(currentUser: _currentUser, topico: _topicoActual);
 
     return BlocProvider(
-      create: (_) => ComentarioBloc(ComentarioService())..add(LoadRespuestas(widget.topico.id!)),
-      child: BlocListener<ComentarioBloc, ComentarioState>(
-        listener: (context, state) {
-          if (state is ComentarioOperationSuccess) {
-            // Comentario creado correctamente
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Comentario enviado')),
-            );
-            // Limpiar input
-            _commentController.clear();
-            // Recargar la lista para que el nuevo comentario aparezca inmediatamente
-            if (widget.topico.id != null) {
-              context.read<ComentarioBloc>().add(LoadRespuestas(widget.topico.id!));
-            }
-          } else if (state is ComentarioLoaded) {
-            // Si el estado cargó una lista nueva, también limpiar el input
-            _commentController.clear();
-          } else if (state is ComentarioError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
-            );
-          }
-        },
+      create: (_) => ComentarioBloc(ComentarioService())..add(LoadRespuestas(_topicoActual.id!)),
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<ComentarioBloc, ComentarioState>(
+            listener: (context, state) {
+              if (state is ComentarioOperationSuccess) {
+                SnackBarHelper.showSuccesssMessage(context, 'Comentario enviado');
+                _commentController.clear();
+                if (_topicoActual.id != null) {
+                  context.read<ComentarioBloc>().add(LoadRespuestas(_topicoActual.id!));
+                }
+              } else if (state is ComentarioLoaded) {
+                _commentController.clear();
+              } else if (state is ComentarioError) {
+                SnackBarHelper.showErrorMessage(context, 'Error: ${state.message}');
+              }
+            },
+          ),
+          BlocListener<TopicoBloc, TopicoState>(
+            listener: (context, state) {
+              if (state is TopicoActionSuccess) {
+                SnackBarHelper.showSuccesssMessage(context, state.message);
+                if (_pendingDeleteId != null && state.affectedTopicoId == _pendingDeleteId) {
+                  _pendingDeleteId = null;
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                  }
+                }
+              } else if (state is TopicoActionFailure) {
+                if (state.affectedTopicoId == _pendingDeleteId) {
+                  _pendingDeleteId = null;
+                }
+                SnackBarHelper.showErrorMessage(context, state.message);
+              }
+            },
+          ),
+        ],
         child: Scaffold(
           backgroundColor: Colors.white,
           body: SafeArea(
@@ -158,21 +186,36 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                             ],
                           ),
                         ),
-                        // Botón X
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.black87, size: 24),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
+                        // Botones de acción
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (canEdit || canDelete)
+                              IconButton(
+                                icon: const Icon(Icons.more_vert, color: Colors.black87, size: 24),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: () => _showTopicoActionSheet(
+                                  canEdit: canEdit,
+                                  canDelete: canDelete,
+                                ),
+                              ),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.black87, size: 24),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     // Título del post
                     Text(
-                      widget.topico.titulo,
+                      _topicoActual.titulo,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -200,7 +243,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                     const SizedBox(height: 16),
                     // Contenido del post
                     Text(
-                      widget.topico.mensaje,
+                      _topicoActual.mensaje,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black87,
@@ -292,17 +335,17 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
   }
 
   Widget _buildLikeDislikeButton() {
-    if (widget.topico.id == null || _currentUserId == null) {
+    if (_topicoActual.id == null || _currentUserId == null) {
       return Container(); // No mostrar si no hay ID
     }
 
     return StreamBuilder<int>(
-      stream: _likesService.getLikesCount(widget.topico.id!),
+      stream: _likesService.getLikesCount(_topicoActual.id!),
       builder: (context, snapshot) {
         final likesCount = snapshot.data ?? 0;
         
         return FutureBuilder<bool>(
-          future: _likesService.hasUserLiked(widget.topico.id!, _currentUserId!),
+          future: _likesService.hasUserLiked(_topicoActual.id!, _currentUserId!),
           builder: (context, likeSnapshot) {
             final isLiked = likeSnapshot.data ?? false;
             return Container(
@@ -314,7 +357,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
               ),
               child: InkWell(
                 onTap: () {
-                  _likesService.likePost(widget.topico.id!, _currentUserId!);
+                _likesService.likePost(_topicoActual.id!, _currentUserId!);
                 },
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
@@ -553,28 +596,108 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
 
   void _submitComment(BuildContext ctx) {
     final texto = _commentController.text.trim();
-    if (texto.isEmpty || widget.topico.id == null) return;
+    if (texto.isEmpty || _topicoActual.id == null) return;
 
     final nueva = Comentario(
       id: null,
       contenido: texto,
       fechaCreacion: DateTime.now().toIso8601String(),
-      autor: widget.topico.autor,
-      topicoId: widget.topico.id,
+      autor: _topicoActual.autor,
+      topicoId: _topicoActual.id,
     );
 
     // Usar el ComentarioBloc provisto en el árbol (creado en build)
     try {
       final bloc = ctx.read<ComentarioBloc>();
-      bloc.add(CreateRespuesta(widget.topico.id!, nueva));
+      bloc.add(CreateRespuesta(_topicoActual.id!, nueva));
     } catch (e, st) {
       // Mostrar mensaje visible para que el usuario sepa que falló
       // y registrar en la consola para depuración.
       log('Error al despachar CreateRespuesta: $e\n$st');
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('No se pudo enviar el comentario')),
-      );
+      SnackBarHelper.showErrorMessage(ctx, 'No se pudo enviar el comentario');
     }
+  }
+
+  void _showTopicoActionSheet({required bool canEdit, required bool canDelete}) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (canEdit)
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Editar tópico'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _navigateToEditTopico();
+                  },
+                ),
+              if (canDelete)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  title: const Text('Eliminar tópico'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _confirmTopicoDelete();
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _navigateToEditTopico() async {
+    final updated = await Navigator.push<Topico>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateTopicPage(initialTopico: _topicoActual),
+      ),
+    );
+    if (!mounted || updated == null) {
+      return;
+    }
+    setState(() {
+      _topicoActual = updated;
+    });
+  }
+
+  Future<void> _confirmTopicoDelete() async {
+    final topicoId = _topicoActual.id;
+    if (topicoId == null) {
+      SnackBarHelper.showErrorMessage(context, 'No se puede eliminar este tópico.');
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Eliminar tópico'),
+          content: const Text('¿Estás seguro de que deseas eliminar este tópico?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    _pendingDeleteId = topicoId;
+    context.read<TopicoBloc>().add(DeleteTopico(topicoId));
   }
 
   @override

@@ -58,7 +58,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         emit(AuthSuccess(usuario)); // Rediriges al home o donde necesites
       } catch (e) {
-        emit(AuthFailure(e.toString()));
+        String message = 'Error desconocido durante el registro.';
+        if (e.toString().contains('TimeoutException') ||
+            e.toString().contains('Tiempo de espera')) {
+          message =
+              'Tiempo de espera agotado. Verifica tu conexión a internet.';
+        } else if (e.toString().contains('SocketException') ||
+            e.toString().contains('Failed host lookup')) {
+          message = 'No se pudo conectar al servidor. Verifica tu conexión.';
+        } else if (e.toString().contains('400')) {
+          message = 'El correo electrónico ya está en uso.';
+        } else {
+          message = e.toString().replaceFirst('Exception:', '').trim();
+          if (message.isEmpty) {
+            message = 'Error al registrar. Intenta nuevamente.';
+          }
+        }
+        if (state is! AuthFailure) {
+          emit(AuthFailure(message));
+        }
       }
     });
 

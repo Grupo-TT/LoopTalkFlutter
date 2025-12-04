@@ -25,5 +25,34 @@ class TopicoBloc extends Bloc<TopicoEvent, TopicoState> {
         emit(TopicoError(e.toString()));
       }
     });
+
+    on<DeleteTopico>((event, emit) async {
+      final currentState = state;
+      List<Topico> currentTopicos = [];
+      if (currentState is TopicoLoaded) {
+        currentTopicos = currentState.topicos;
+        emit(TopicoActionInProgress(currentTopicos));
+      }
+      try {
+        await topicoService.eliminarTopico(event.topicoId);
+        final updated = currentTopicos.where((t) => t.id != event.topicoId).toList();
+        emit(TopicoActionSuccess(
+          updated,
+          message: 'Tópico eliminado con éxito',
+          affectedTopicoId: event.topicoId,
+        ));
+        add(LoadTopicos());
+      } catch (e) {
+        if (currentTopicos.isNotEmpty) {
+          emit(TopicoActionFailure(
+            currentTopicos,
+            message: e.toString(),
+            affectedTopicoId: event.topicoId,
+          ));
+        } else {
+          emit(TopicoError(e.toString()));
+        }
+      }
+    });
   }
 }

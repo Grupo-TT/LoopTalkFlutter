@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import '../../model/topico.dart';
+import '../../model/requests/actualizar_topico_request.dart';
 import '../../utils/token_storage.dart';
 
 
@@ -66,5 +67,67 @@ class TopicoService {
     } else {
       throw Exception("Error al crear el tópico: ${response.statusCode} ${response.body}");
     }
+  }
+
+  Future<Topico> actualizarTopico({
+    required int topicoId,
+    required ActualizarTopicoRequest request,
+  }) async {
+    final url = Uri.parse("$baseUrl/topico/$topicoId");
+    final token = await TokenStorage.getToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception("No se encontró el token de autenticación");
+    }
+
+    final response = await http
+        .put(
+          url,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token",
+          },
+          body: jsonEncode(request.toJson()),
+        )
+        .timeout(_timeout, onTimeout: () {
+      throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+    });
+
+    if (response.statusCode == 200) {
+      return Topico.fromJson(jsonDecode(response.body));
+    }
+    if (response.statusCode == 403) {
+      throw Exception("No tienes permiso para actualizar este tópico.");
+    }
+    throw Exception("Error al actualizar el tópico: ${response.statusCode} ${response.body}");
+  }
+
+  Future<void> eliminarTopico(int topicoId) async {
+    final url = Uri.parse("$baseUrl/topico/$topicoId");
+    final token = await TokenStorage.getToken();
+
+    if (token == null || token.isEmpty) {
+      throw Exception("No se encontró el token de autenticación");
+    }
+
+    final response = await http
+        .delete(
+          url,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token",
+          },
+        )
+        .timeout(_timeout, onTimeout: () {
+      throw Exception("Tiempo de espera agotado. Verifica tu conexión a internet.");
+    });
+
+    if (response.statusCode == 204) {
+      return;
+    }
+    if (response.statusCode == 403) {
+      throw Exception("No tienes permiso para eliminar este tópico.");
+    }
+    throw Exception("Error al eliminar el tópico: ${response.statusCode} ${response.body}");
   }
 }

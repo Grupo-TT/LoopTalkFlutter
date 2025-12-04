@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -7,19 +9,51 @@ import 'vista_login.dart';
 import 'vista_editar_perfil.dart';
 import 'vista_cambiar_password.dart';
 
-class VistaPerfil extends StatelessWidget {
+class VistaPerfil extends StatefulWidget {
   final VoidCallback? onNavigateToHome;
+  final bool isActive;
 
-  const VistaPerfil({super.key, this.onNavigateToHome});
+  const VistaPerfil({super.key, this.onNavigateToHome, this.isActive = false});
+
+  @override
+  State<VistaPerfil> createState() => _VistaPerfilState();
+}
+
+class _VistaPerfilState extends State<VistaPerfil> {
+  static const _tutorialProfileKey = 'tutorial_profile_shown';
+  final GlobalKey _editProfileKey = GlobalKey();
+  bool _profileTutorialSeen = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileTutorial();
+  }
+
+  @override
+  void didUpdateWidget(covariant VistaPerfil oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_profileTutorialSeen && widget.isActive && !oldWidget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+    }
+  }
+
+  Future<void> _loadProfileTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = _currentUserId();
+    final seen = prefs.getBool('${_tutorialProfileKey}_$userId') ?? false;
+    _profileTutorialSeen = seen;
+    if (!seen && widget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.error)));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
         }
       },
       child: Scaffold(
@@ -55,9 +89,7 @@ class VistaPerfil extends StatelessWidget {
                                 size: 20,
                               ),
                               onPressed: () {
-                                if (onNavigateToHome != null) {
-                                  onNavigateToHome!();
-                                }
+                                widget.onNavigateToHome?.call();
                               },
                             ),
                           ),
@@ -100,31 +132,29 @@ class VistaPerfil extends StatelessWidget {
                                     size: 40,
                                     color: Colors.black,
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  usuario.nombre,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  usuario.correoElectronico,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
                             ),
-                          ),
-                    const SizedBox(height: 24),
-                    _buildStatsSection(),
-                    const SizedBox(height: 32),
+                            const SizedBox(height: 16),
+                            Text(
+                              usuario.nombre,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              usuario.correoElectronico,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
                     _buildSectionTitle('General'),
                     const SizedBox(height: 12),
                     _buildGeneralSection(context),
@@ -148,6 +178,114 @@ class VistaPerfil extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _maybeShowProfileTutorial() {
+    if (!mounted || _profileTutorialSeen || !widget.isActive) {
+      return;
+    }
+    if (_editProfileKey.currentContext == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+      return;
+    }
+
+    final targets = [
+      TargetFocus(
+        identify: 'edit_profile_item',
+        keyTarget: _editProfileKey,
+        alignSkip: Alignment.topRight,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) => _buildProfileTutorialContent(
+              title: 'Personaliza tu perfil',
+              description: 'Aquí puedes editar tu perfil cuando lo necesites.',
+              onNext: controller.next,
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    TutorialCoachMark(
+      targets: targets,
+      colorShadow: Colors.black.withValues(alpha: 0.75),
+      textSkip: 'Saltar',
+      paddingFocus: 8,
+      onFinish: _markProfileTutorialSeen,
+      onSkip: () {
+        _markProfileTutorialSeen();
+        return true;
+      },
+    ).show(context: context);
+  }
+
+  Widget _buildProfileTutorialContent({
+    required String title,
+    required String description,
+    required VoidCallback onNext,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: onNext,
+              child: const Text('Entendido'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _markProfileTutorialSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = _currentUserId();
+    await prefs.setBool('${_tutorialProfileKey}_$userId', true);
+    _profileTutorialSeen = true;
+  }
+
+  String _currentUserId() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthSuccess) {
+      return authState.usuario.id.toString();
+    }
+    return 'guest';
   }
 
   void _cerrarSesion(BuildContext context) {
@@ -265,191 +403,6 @@ class VistaPerfil extends StatelessWidget {
     );
   }
 
-  void _eliminarCuenta(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (BuildContext dialogContext) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Icono de advertencia
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.warning_rounded,
-                    size: 32,
-                    color: Colors.red[600],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Título
-                const Text(
-                  '¿Eliminar tu cuenta?',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Descripción
-                Text(
-                  'Esta acción borrará tu cuenta y todos tus datos de forma permanente. No podrás recuperarlos después.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // Botones
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: Colors.grey[300]!, width: 1.5),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Cancelar',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Funcionalidad de eliminar cuenta próximamente'),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[600],
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Eliminar',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStatsSection() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.chat_bubble_outline,
-            value: '34',
-            label: 'Loops Creados',
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.send_outlined,
-            value: '57',
-            label: 'Echos Enviados',
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            icon: Icons.chat_bubble_outline,
-            value: '34',
-            label: 'Beads Creados',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 24, color: Colors.black),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w400,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -470,6 +423,7 @@ class VistaPerfil extends StatelessWidget {
       child: Column(
         children: [
           _buildMenuItem(
+            itemKey: _editProfileKey,
             icon: Icons.person_outline,
             title: 'Editar Perfil',
             subtitle: 'Actualiza tu foto, nombre o correo',
@@ -517,15 +471,6 @@ class VistaPerfil extends StatelessWidget {
             title: 'Cerrar sesión',
             subtitle: 'Sal de la aplicación en este dispositivo',
             onTap: () => _cerrarSesion(context),
-            showDivider: true,
-          ),
-          _buildMenuItem(
-            icon: Icons.delete_outline,
-            title: 'Eliminar cuenta',
-            subtitle: 'Borra tu cuenta y todos tus datos',
-            titleColor: Colors.red,
-            iconColor: Colors.red,
-            onTap: () => _eliminarCuenta(context),
             showDivider: false,
           ),
         ],
@@ -534,6 +479,7 @@ class VistaPerfil extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
+    Key? itemKey,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -545,6 +491,7 @@ class VistaPerfil extends StatelessWidget {
     return Column(
       children: [
         InkWell(
+          key: itemKey,
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

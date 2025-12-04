@@ -21,6 +21,38 @@ class TopicoLoaded extends TopicoState {
   List<Object> get props => [topicos];
 }
 
+class TopicoActionInProgress extends TopicoLoaded {
+  const TopicoActionInProgress(super.topicos);
+}
+
+class TopicoActionSuccess extends TopicoLoaded {
+  final String message;
+  final int? affectedTopicoId;
+
+  const TopicoActionSuccess(
+    super.topicos, {
+    required this.message,
+    this.affectedTopicoId,
+  });
+
+  @override
+  List<Object> get props => [...super.props, message, affectedTopicoId ?? -1];
+}
+
+class TopicoActionFailure extends TopicoLoaded {
+  final String message;
+  final int? affectedTopicoId;
+
+  const TopicoActionFailure(
+    super.topicos, {
+    required this.message,
+    this.affectedTopicoId,
+  });
+
+  @override
+  List<Object> get props => [...super.props, message, affectedTopicoId ?? -1];
+}
+
 class TopicoError extends TopicoState {
   final String message;
 

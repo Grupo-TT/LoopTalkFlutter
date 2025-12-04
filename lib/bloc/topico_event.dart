@@ -8,3 +8,12 @@ abstract class TopicoEvent extends Equatable {
 }
 
 class LoadTopicos extends TopicoEvent {}
+
+class DeleteTopico extends TopicoEvent {
+  final int topicoId;
+
+  const DeleteTopico(this.topicoId);
+
+  @override
+  List<Object> get props => [topicoId];
+}

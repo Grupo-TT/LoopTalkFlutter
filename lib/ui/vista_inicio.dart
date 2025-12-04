@@ -11,8 +11,12 @@ import '../bloc/categoria_event.dart';
 import '../bloc/categoria_state.dart';
 import '../model/topico.dart';
 import '../model/categoria.dart';
+import '../model/usuario.dart';
 import '../services/firebase_likes_service.dart';
+import '../components/snackbar_helper.dart';
 import 'vista_detalle_topico.dart';
+import 'create_topic_page.dart';
+import '../utils/permission_utils.dart';
 
 class VistaInicio extends StatefulWidget {
   const VistaInicio({super.key});
@@ -26,6 +30,7 @@ class _VistaInicioState extends State<VistaInicio> {
   int? _selectedCategoryId;
   final FirebaseLikesService _likesService = FirebaseLikesService();
   String? _currentUserId;
+  Usuario? _currentUser;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   bool _isHeaderVisible = true;
@@ -46,6 +51,7 @@ class _VistaInicioState extends State<VistaInicio> {
     // Obtener userId del AuthBloc
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthSuccess) {
+      _currentUser = authState.usuario;
       _currentUserId = authState.usuario.id.toString();
     }
     
@@ -84,19 +90,25 @@ class _VistaInicioState extends State<VistaInicio> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.white,
-      child: Column(
-        children: [
-          // Header personalizado que se oculta al hacer scroll
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: _isHeaderVisible ? kToolbarHeight + MediaQuery.of(context).padding.top : 0,
-            color: Colors.white,
-            child: _isHeaderVisible ? _buildHeader() : const SizedBox.shrink(),
-          ),
-          // Contenido
-          Expanded(
+    return BlocListener<TopicoBloc, TopicoState>(
+      listener: (context, state) {
+        if (state is TopicoActionSuccess) {
+          SnackBarHelper.showSuccesssMessage(context, state.message);
+        } else if (state is TopicoActionFailure) {
+          SnackBarHelper.showErrorMessage(context, state.message);
+        }
+      },
+      child: ColoredBox(
+        color: Colors.white,
+        child: Column(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: _isHeaderVisible ? kToolbarHeight + MediaQuery.of(context).padding.top : 0,
+              color: Colors.white,
+              child: _isHeaderVisible ? _buildHeader() : const SizedBox.shrink(),
+            ),
+            Expanded(
             child: BlocBuilder<TopicoBloc, TopicoState>(
               builder: (context, state) {
                 if (state is TopicoLoading) {
@@ -105,32 +117,32 @@ class _VistaInicioState extends State<VistaInicio> {
 
                 if (state is TopicoLoaded) {
                   final allTopicos = state.topicos;
-                  
+
                   // Filtrar por categoría
                   var topicos = _selectedCategoryId != null
                       ? allTopicos.where((t) => t.curso?.id == _selectedCategoryId).toList()
                       : allTopicos;
-                  
+
                   // Filtrar por búsqueda si está activa
                   if (_isSearchActive && _searchController.text.isNotEmpty) {
                     final searchQuery = _searchController.text.toLowerCase();
                     topicos = topicos.where((t) {
                       return t.titulo.toLowerCase().contains(searchQuery) ||
-                             t.mensaje.toLowerCase().contains(searchQuery);
+                          t.mensaje.toLowerCase().contains(searchQuery);
                     }).toList();
                   }
-                  
+
                   // Inicializar posts en Firebase si no existen
                   for (var topico in topicos) {
                     if (topico.id != null) {
                       _likesService.initializePost(topico.id!);
                     }
                   }
-                  
+
                   if (topicos.isEmpty) {
                     return _buildEmptyState();
                   }
-                  
+
                   return RefreshIndicator(
                     onRefresh: () async {
                       context.read<TopicoBloc>().add(LoadTopicos());
@@ -138,17 +150,14 @@ class _VistaInicioState extends State<VistaInicio> {
                     child: CustomScrollView(
                       controller: _scrollController,
                       slivers: [
-                        // Saludo y pregunta (oculto cuando se busca)
                         if (!_isSearchActive)
                           SliverToBoxAdapter(
                             child: _buildGreetingSection(),
                           ),
-                        // Sección de filtros (oculta cuando se busca)
                         if (!_isSearchActive)
                           SliverToBoxAdapter(
                             child: _buildFilterSection(),
                           ),
-                        // Lista de tópicos
                         SliverPadding(
                           padding: EdgeInsets.symmetric(
                             horizontal: 20,
@@ -185,12 +194,10 @@ class _VistaInicioState extends State<VistaInicio> {
                                 )
                               : SliverList(
                                   delegate: SliverChildBuilderDelegate(
-                                    (context, index) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(bottom: 16),
-                                        child: _buildTopicoCard(topicos[index]),
-                                      );
-                                    },
+                                    (context, index) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 16),
+                                      child: _buildTopicoCard(topicos[index]),
+                                    ),
                                     childCount: topicos.length,
                                   ),
                                 ),
@@ -198,31 +205,30 @@ class _VistaInicioState extends State<VistaInicio> {
                       ],
                     ),
                   );
+                } else if (state is TopicoError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text('Error: ${state.message}'),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => context.read<TopicoBloc>().add(LoadTopicos()),
+                          child: const Text('Reintentar'),
+                        ),
+                      ],
+                    ),
+                  );
                 }
-
-        if (state is TopicoError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('Error: ${state.message}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.read<TopicoBloc>().add(LoadTopicos()),
-                  child: const Text('Reintentar'),
-                ),
-              ],
-            ),
-          );
-        }
 
                 return const Center(child: CircularProgressIndicator());
               },
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -486,6 +492,89 @@ class _VistaInicioState extends State<VistaInicio> {
     );
   }
 
+  void _showTopicoActions(Topico topico) {
+    final usuario = _currentUser;
+    final canEdit = canEditTopico(currentUser: usuario, topico: topico);
+    final canDelete = canDeleteTopico(currentUser: usuario, topico: topico);
+
+    if (!canEdit && !canDelete) {
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (canEdit)
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Editar tópico'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _navigateToEdit(topico);
+                  },
+                ),
+              if (canDelete)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  title: const Text('Eliminar tópico'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _confirmDelete(topico);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _navigateToEdit(Topico topico) async {
+    await Navigator.push<Topico>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateTopicPage(initialTopico: topico),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(Topico topico) async {
+    final topicoId = topico.id;
+    if (topicoId == null) {
+      SnackBarHelper.showErrorMessage(context, 'No se puede eliminar este tópico.');
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Eliminar tópico'),
+          content: const Text('¿Estás seguro de que deseas eliminar este tópico?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    context.read<TopicoBloc>().add(DeleteTopico(topicoId));
+  }
+
   Widget _buildTopicoCard(Topico topico) {
     final autor = topico.autor;
     final username = autor != null
@@ -493,6 +582,9 @@ class _VistaInicioState extends State<VistaInicio> {
         : '@Usuario';
     final tiempoPublicacion = _formatTimeAgo(topico.fechaCreacion);
     final categoria = topico.curso?.nombre ?? 'General';
+    final canEdit = canEditTopico(currentUser: _currentUser, topico: topico);
+    final canDelete = canDeleteTopico(currentUser: _currentUser, topico: topico);
+    final hasActions = canEdit || canDelete;
 
     return Container(
       decoration: BoxDecoration(
@@ -563,14 +655,13 @@ class _VistaInicioState extends State<VistaInicio> {
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.more_vert, color: Colors.grey[600], size: 20),
-                      onPressed: () {
-                        // Menú de opciones
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
+                    if (hasActions)
+                      IconButton(
+                        icon: Icon(Icons.more_vert, color: Colors.grey[600], size: 20),
+                        onPressed: () => _showTopicoActions(topico),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 12),
