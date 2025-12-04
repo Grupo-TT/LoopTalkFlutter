@@ -27,6 +27,7 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
   final GlobalKey _fabKey = GlobalKey();
   final GlobalKey _categoryFabKey = GlobalKey();
+  final GlobalKey _bottomNavBarKey = GlobalKey();
   bool _tutorialAlreadySeen = false;
   bool _categoryTutorialSeen = false;
   bool _isCheckingTutorial = false;
@@ -75,7 +76,10 @@ class _MainNavigationState extends State<MainNavigation> {
               onNavigateToHome: _onNavigateToHome,
               isActive: _currentIndex == 1,
             ),
-            const VistaPrueba(),
+            VistaPrueba(
+              navBarKey: _bottomNavBarKey,
+              isActive: _currentIndex == 2,
+            ),
           ]
         : [
             const VistaInicio(),
@@ -84,7 +88,10 @@ class _MainNavigationState extends State<MainNavigation> {
               onNavigateToHome: _onNavigateToHome,
               isActive: _currentIndex == 2,
             ),
-            const VistaPrueba(),
+            VistaPrueba(
+              navBarKey: _bottomNavBarKey,
+              isActive: _currentIndex == 3,
+            ),
           ];
 
     final List<String> pageTitles = isEstudiante
@@ -154,6 +161,7 @@ class _MainNavigationState extends State<MainNavigation> {
           ],
         ),
         child: BottomNavigationBar(
+          key: _bottomNavBarKey,
           currentIndex: _currentIndex,
           onTap: (index) {
             setState(() {

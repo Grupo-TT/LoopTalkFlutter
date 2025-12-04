@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../bloc/topico_bloc.dart';
@@ -12,19 +13,156 @@ import '../services/firebase_likes_service.dart';
 import '../repository/comentario_service.dart';
 
 class VistaPrueba extends StatefulWidget {
-  const VistaPrueba({super.key});
+  final GlobalKey? navBarKey;
+  final bool isActive;
+
+  const VistaPrueba({super.key, this.navBarKey, this.isActive = false});
 
   @override
   State<VistaPrueba> createState() => _VistaPruebaState();
 }
 
 class _VistaPruebaState extends State<VistaPrueba> {
+  static const _tutorialPrefKeyStats = 'tutorial_stats_shown';
+  bool _statsTutorialSeen = true;
+
   @override
   void initState() {
     super.initState();
     // Cargar los tópicos cuando se abre la vista
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TopicoBloc>().add(LoadTopicos());
+    });
+    _loadStatsTutorial();
+  }
+
+  @override
+  void didUpdateWidget(covariant VistaPrueba oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_statsTutorialSeen && widget.isActive && !oldWidget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStatsTutorial());
+    }
+  }
+
+  Future<void> _loadStatsTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = _currentUserId();
+    final seen = prefs.getBool('${_tutorialPrefKeyStats}_$userId') ?? false;
+    setState(() {
+      _statsTutorialSeen = seen;
+    });
+    if (!seen && widget.isActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStatsTutorial());
+    }
+  }
+
+  String _currentUserId() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthSuccess) {
+      return authState.usuario.id.toString();
+    }
+    return 'guest';
+  }
+
+  void _maybeShowStatsTutorial() {
+    if (!mounted || _statsTutorialSeen || !widget.isActive || widget.navBarKey == null) {
+      return;
+    }
+    if (widget.navBarKey!.currentContext == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStatsTutorial());
+      return;
+    }
+
+    final targets = <TargetFocus>[
+      TargetFocus(
+        identify: 'stats_nav_bar',
+        keyTarget: widget.navBarKey!,
+        alignSkip: Alignment.topRight,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) => _buildTutorialContent(
+              title: 'Estadísticas',
+              description: 'Aquí puedes ver tus estadísticas más relevantes: loops creados, actividad, escritura, categorías y engagement.',
+              onNext: controller.next,
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    TutorialCoachMark(
+      targets: targets,
+      colorShadow: Colors.black.withValues(alpha: 0.75),
+      textSkip: 'Saltar',
+      paddingFocus: 8,
+      onFinish: _markStatsTutorialSeen,
+      onSkip: () {
+        _markStatsTutorialSeen();
+        return true;
+      },
+    ).show(context: context);
+  }
+
+  Widget _buildTutorialContent({
+    required String title,
+    required String description,
+    required VoidCallback onNext,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: onNext,
+              child: const Text('Entendido'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _markStatsTutorialSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = _currentUserId();
+    await prefs.setBool('${_tutorialPrefKeyStats}_$userId', true);
+    setState(() {
+      _statsTutorialSeen = true;
     });
   }
 
