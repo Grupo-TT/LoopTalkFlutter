@@ -6,6 +6,7 @@ class Usuario {
   final String correoElectronico;
   final String? contrasenia;
   final Rol rol;
+  final String? fotoUrl;
 
   Usuario({
     required this.id,
@@ -13,6 +14,7 @@ class Usuario {
     required this.correoElectronico,
     required this.rol,
     this.contrasenia,
+    this.fotoUrl,
   });
 
   factory Usuario.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,26 @@ class Usuario {
       nombre: json['nombre'] ?? json['username'] ?? 'Usuario',
       correoElectronico: json['correoElectronico'] ?? json['email'] ?? '',
       rol: _parseRol(json['rol']),
+      fotoUrl: json['fotoUrl'] as String?,
+    );
+  }
+
+  /// Creates a copy of this Usuario with the given fields replaced with new values.
+  Usuario copyWith({
+    int? id,
+    String? nombre,
+    String? correoElectronico,
+    String? contrasenia,
+    Rol? rol,
+    String? fotoUrl,
+  }) {
+    return Usuario(
+      id: id ?? this.id,
+      nombre: nombre ?? this.nombre,
+      correoElectronico: correoElectronico ?? this.correoElectronico,
+      contrasenia: contrasenia ?? this.contrasenia,
+      rol: rol ?? this.rol,
+      fotoUrl: fotoUrl ?? this.fotoUrl,
     );
   }
 
@@ -30,6 +52,7 @@ class Usuario {
       'nombre': nombre,
       'correoElectronico': correoElectronico,
       'rol': rol.name,
+      if (fotoUrl != null) 'fotoUrl': fotoUrl,
     };
   }
 

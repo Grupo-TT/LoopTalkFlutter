@@ -100,10 +100,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             id: usuarioActual.id,
             nombre: event.nombre,
             correo: event.correoElectronico,
+            fotoUrl: event.fotoUrl,
             token: token,
           );
 
-          emit(AuthSuccess(usuarioActualizado));
+          // If the backend didn't return fotoUrl, preserve the one we sent
+          final finalFotoUrl =
+              usuarioActualizado.fotoUrl ??
+              event.fotoUrl ??
+              usuarioActual.fotoUrl;
+          final usuarioConFoto = usuarioActualizado.copyWith(
+            fotoUrl: finalFotoUrl,
+          );
+
+          emit(AuthSuccess(usuarioConFoto));
         } catch (e) {
           emit(AuthFailure("Error al actualizar el perfil: $e"));
         }
@@ -134,7 +144,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       }
     });
-     on<RefreshAuth>((event, emit) async {
+    on<RefreshAuth>((event, emit) async {
       final token = await TokenStorage.getToken();
       if (token == null) {
         emit(AuthInitial());

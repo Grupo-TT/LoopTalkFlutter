@@ -7,11 +7,13 @@ import 'dart:async' as _i8;
 
 import 'package:loop_talk/model/categoria.dart' as _i2;
 import 'package:loop_talk/model/comentario.dart' as _i3;
+import 'package:loop_talk/model/requests/actualizar_topico_request.dart'
+    as _i11;
 import 'package:loop_talk/model/topico.dart' as _i4;
 import 'package:loop_talk/model/usuario.dart' as _i5;
 import 'package:loop_talk/repository/categoria_service.dart' as _i6;
 import 'package:loop_talk/repository/comentario_service.dart' as _i9;
-import 'package:loop_talk/repository/loop_talk_service_api.dart' as _i11;
+import 'package:loop_talk/repository/loop_talk_service_api.dart' as _i12;
 import 'package:loop_talk/repository/topico_service.dart' as _i10;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
@@ -191,13 +193,44 @@ class MockTopicoService extends _i1.Mock implements _i10.TopicoService {
             ),
           )
           as _i8.Future<_i4.Topico>);
+
+  @override
+  _i8.Future<_i4.Topico> actualizarTopico({
+    required int? topicoId,
+    required _i11.ActualizarTopicoRequest? request,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#actualizarTopico, [], {
+              #topicoId: topicoId,
+              #request: request,
+            }),
+            returnValue: _i8.Future<_i4.Topico>.value(
+              _FakeTopico_2(
+                this,
+                Invocation.method(#actualizarTopico, [], {
+                  #topicoId: topicoId,
+                  #request: request,
+                }),
+              ),
+            ),
+          )
+          as _i8.Future<_i4.Topico>);
+
+  @override
+  _i8.Future<void> eliminarTopico(int? topicoId) =>
+      (super.noSuchMethod(
+            Invocation.method(#eliminarTopico, [topicoId]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
 }
 
 /// A class which mocks [LoopTalkServiceApi].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockLoopTalkServiceApi extends _i1.Mock
-    implements _i11.LoopTalkServiceApi {
+    implements _i12.LoopTalkServiceApi {
   MockLoopTalkServiceApi() {
     _i1.throwOnMissingStub(this);
   }
@@ -269,6 +302,7 @@ class MockLoopTalkServiceApi extends _i1.Mock
     required int? id,
     required String? nombre,
     required String? correo,
+    String? fotoUrl,
     required String? token,
   }) =>
       (super.noSuchMethod(
@@ -276,6 +310,7 @@ class MockLoopTalkServiceApi extends _i1.Mock
               #id: id,
               #nombre: nombre,
               #correo: correo,
+              #fotoUrl: fotoUrl,
               #token: token,
             }),
             returnValue: _i8.Future<_i5.Usuario>.value(
@@ -285,6 +320,7 @@ class MockLoopTalkServiceApi extends _i1.Mock
                   #id: id,
                   #nombre: nombre,
                   #correo: correo,
+                  #fotoUrl: fotoUrl,
                   #token: token,
                 }),
               ),

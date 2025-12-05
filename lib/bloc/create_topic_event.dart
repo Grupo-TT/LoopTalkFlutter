@@ -11,15 +11,17 @@ class CreateTopicSubmitted extends CreateTopicEvent {
   final String titulo;
   final String mensaje;
   final int idCurso;
+  final String? fotoUrl;
 
   const CreateTopicSubmitted({
     required this.titulo,
     required this.mensaje,
     required this.idCurso,
+    this.fotoUrl,
   });
 
   @override
-  List<Object> get props => [titulo, mensaje, idCurso];
+  List<Object> get props => [titulo, mensaje, idCurso, fotoUrl ?? ''];
 }
 
 class UpdateTopicSubmitted extends CreateTopicEvent {
@@ -28,6 +30,7 @@ class UpdateTopicSubmitted extends CreateTopicEvent {
   final String mensaje;
   final int idCurso;
   final String? estado;
+  final String? fotoUrl;
 
   const UpdateTopicSubmitted({
     required this.topicoId,
@@ -35,8 +38,16 @@ class UpdateTopicSubmitted extends CreateTopicEvent {
     required this.mensaje,
     required this.idCurso,
     this.estado,
+    this.fotoUrl,
   });
 
   @override
-  List<Object> get props => [topicoId, titulo, mensaje, idCurso, estado ?? ''];
+  List<Object> get props => [
+    topicoId,
+    titulo,
+    mensaje,
+    idCurso,
+    estado ?? '',
+    fotoUrl ?? '',
+  ];
 }

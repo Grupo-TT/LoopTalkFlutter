@@ -9,6 +9,7 @@ class Topico {
   final String? fechaCreacion;
   final Usuario? autor;
   final Categoria? curso;
+  final String? fotoUrl;
 
   Topico({
     this.id,
@@ -18,6 +19,7 @@ class Topico {
     this.fechaCreacion,
     this.autor,
     this.curso,
+    this.fotoUrl,
   });
 
   factory Topico.fromJson(Map<String, dynamic> json) {
@@ -29,10 +31,16 @@ class Topico {
       fechaCreacion: json['fechaCreacion'] as String?,
       autor: json['autor'] != null ? Usuario.fromJson(json['autor']) : null,
       curso: json['curso'] != null ? Categoria.fromJson(json['curso']) : null,
+      fotoUrl: json['fotoUrl'] as String?,
     );
   }
 
   Map<String, dynamic> toJsonCreate(int idCurso) {
-    return {'titulo': titulo, 'mensaje': mensaje, 'idCurso': idCurso};
+    return {
+      'titulo': titulo,
+      'mensaje': mensaje,
+      'idCurso': idCurso,
+      if (fotoUrl != null) 'fotoUrl': fotoUrl,
+    };
   }
 }

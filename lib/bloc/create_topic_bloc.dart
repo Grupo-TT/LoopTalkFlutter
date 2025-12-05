@@ -21,8 +21,15 @@ class CreateTopicBloc extends Bloc<CreateTopicEvent, CreateTopicState> {
   ) async {
     emit(CreateTopicInProgress());
     try {
-      final topico = Topico(titulo: event.titulo, mensaje: event.mensaje);
-      final nuevoTopico = await topicoService.crearTopico(topico, event.idCurso);
+      final topico = Topico(
+        titulo: event.titulo,
+        mensaje: event.mensaje,
+        fotoUrl: event.fotoUrl,
+      );
+      final nuevoTopico = await topicoService.crearTopico(
+        topico,
+        event.idCurso,
+      );
       emit(CreateTopicSuccess(topico: nuevoTopico));
     } catch (e) {
       emit(CreateTopicFailure(error: e.toString()));

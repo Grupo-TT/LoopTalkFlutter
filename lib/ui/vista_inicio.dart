@@ -14,6 +14,7 @@ import '../model/categoria.dart';
 import '../model/usuario.dart';
 import '../services/firebase_likes_service.dart';
 import '../components/snackbar_helper.dart';
+import '../components/user_avatar.dart';
 import 'vista_detalle_topico.dart';
 import 'create_topic_page.dart';
 import '../utils/permission_utils.dart';
@@ -47,17 +48,17 @@ class _VistaInicioState extends State<VistaInicio> {
         statusBarBrightness: Brightness.light,
       ),
     );
-    
+
     // Obtener userId del AuthBloc
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthSuccess) {
       _currentUser = authState.usuario;
       _currentUserId = authState.usuario.id.toString();
     }
-    
+
     context.read<TopicoBloc>().add(LoadTopicos());
     context.read<CategoriaBloc>().add(LoadCategorias());
-    
+
     _scrollController.addListener(_onScroll);
     _searchController.addListener(() {
       setState(() {}); // Actualizar cuando cambie el texto de búsqueda
@@ -75,7 +76,7 @@ class _VistaInicioState extends State<VistaInicio> {
   void _onScroll() {
     if (_scrollController.hasClients) {
       final shouldHide = _scrollController.offset > 50;
-      
+
       if (shouldHide && _isHeaderVisible) {
         setState(() {
           _isHeaderVisible = false;
@@ -104,129 +105,145 @@ class _VistaInicioState extends State<VistaInicio> {
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              height: _isHeaderVisible ? kToolbarHeight + MediaQuery.of(context).padding.top : 0,
+              height: _isHeaderVisible
+                  ? kToolbarHeight + MediaQuery.of(context).padding.top
+                  : 0,
               color: Colors.white,
-              child: _isHeaderVisible ? _buildHeader() : const SizedBox.shrink(),
+              child: _isHeaderVisible
+                  ? _buildHeader()
+                  : const SizedBox.shrink(),
             ),
             Expanded(
-            child: BlocBuilder<TopicoBloc, TopicoState>(
-              builder: (context, state) {
-                if (state is TopicoLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (state is TopicoLoaded) {
-                  final allTopicos = state.topicos;
-
-                  // Filtrar por categoría
-                  var topicos = _selectedCategoryId != null
-                      ? allTopicos.where((t) => t.curso?.id == _selectedCategoryId).toList()
-                      : allTopicos;
-
-                  // Filtrar por búsqueda si está activa
-                  if (_isSearchActive && _searchController.text.isNotEmpty) {
-                    final searchQuery = _searchController.text.toLowerCase();
-                    topicos = topicos.where((t) {
-                      return t.titulo.toLowerCase().contains(searchQuery) ||
-                          t.mensaje.toLowerCase().contains(searchQuery);
-                    }).toList();
+              child: BlocBuilder<TopicoBloc, TopicoState>(
+                builder: (context, state) {
+                  if (state is TopicoLoading) {
+                    return const Center(child: CircularProgressIndicator());
                   }
 
-                  // Inicializar posts en Firebase si no existen
-                  for (var topico in topicos) {
-                    if (topico.id != null) {
-                      _likesService.initializePost(topico.id!);
+                  if (state is TopicoLoaded) {
+                    final allTopicos = state.topicos;
+
+                    // Filtrar por categoría
+                    var topicos = _selectedCategoryId != null
+                        ? allTopicos
+                              .where((t) => t.curso?.id == _selectedCategoryId)
+                              .toList()
+                        : allTopicos;
+
+                    // Filtrar por búsqueda si está activa
+                    if (_isSearchActive && _searchController.text.isNotEmpty) {
+                      final searchQuery = _searchController.text.toLowerCase();
+                      topicos = topicos.where((t) {
+                        return t.titulo.toLowerCase().contains(searchQuery) ||
+                            t.mensaje.toLowerCase().contains(searchQuery);
+                      }).toList();
                     }
-                  }
 
-                  if (topicos.isEmpty) {
-                    return _buildEmptyState();
-                  }
+                    // Inicializar posts en Firebase si no existen
+                    for (var topico in topicos) {
+                      if (topico.id != null) {
+                        _likesService.initializePost(topico.id!);
+                      }
+                    }
 
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      context.read<TopicoBloc>().add(LoadTopicos());
-                    },
-                    child: CustomScrollView(
-                      controller: _scrollController,
-                      slivers: [
-                        if (!_isSearchActive)
-                          SliverToBoxAdapter(
-                            child: _buildGreetingSection(),
-                          ),
-                        if (!_isSearchActive)
-                          SliverToBoxAdapter(
-                            child: _buildFilterSection(),
-                          ),
-                        SliverPadding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: _isSearchActive ? 20 : 0,
-                          ),
-                          sliver: topicos.isEmpty && _isSearchActive && _searchController.text.isNotEmpty
-                              ? SliverToBoxAdapter(
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(40.0),
-                                      child: Column(
-                                        children: [
-                                          Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            'No se encontraron resultados',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.grey[600],
+                    if (topicos.isEmpty) {
+                      return _buildEmptyState();
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<TopicoBloc>().add(LoadTopicos());
+                      },
+                      child: CustomScrollView(
+                        controller: _scrollController,
+                        slivers: [
+                          if (!_isSearchActive)
+                            SliverToBoxAdapter(child: _buildGreetingSection()),
+                          if (!_isSearchActive)
+                            SliverToBoxAdapter(child: _buildFilterSection()),
+                          SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: _isSearchActive ? 20 : 0,
+                            ),
+                            sliver:
+                                topicos.isEmpty &&
+                                    _isSearchActive &&
+                                    _searchController.text.isNotEmpty
+                                ? SliverToBoxAdapter(
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(40.0),
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.search_off,
+                                              size: 64,
+                                              color: Colors.grey[400],
                                             ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            'Intenta con otros términos de búsqueda',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey[500],
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              'No se encontraron resultados',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                color: Colors.grey[600],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Intenta con otros términos de búsqueda',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey[500],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                              : SliverList(
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, index) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 16),
-                                      child: _buildTopicoCard(topicos[index]),
+                                  )
+                                : SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, index) => Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 16,
+                                        ),
+                                        child: _buildTopicoCard(topicos[index]),
+                                      ),
+                                      childCount: topicos.length,
                                     ),
-                                    childCount: topicos.length,
                                   ),
-                                ),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (state is TopicoError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                        const SizedBox(height: 16),
-                        Text('Error: ${state.message}'),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () => context.read<TopicoBloc>().add(LoadTopicos()),
-                          child: const Text('Reintentar'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (state is TopicoError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red,
+                          ),
+                          const SizedBox(height: 16),
+                          Text('Error: ${state.message}'),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () =>
+                                context.read<TopicoBloc>().add(LoadTopicos()),
+                            child: const Text('Reintentar'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                return const Center(child: CircularProgressIndicator());
-              },
+                  return const Center(child: CircularProgressIndicator());
+                },
+              ),
             ),
-          ),
           ],
         ),
       ),
@@ -239,9 +256,7 @@ class _VistaInicioState extends State<VistaInicio> {
       child: SafeArea(
         bottom: false,
         child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-          ),
+          decoration: const BoxDecoration(color: Colors.white),
           padding: const EdgeInsets.only(
             left: 20,
             right: 20,
@@ -267,13 +282,25 @@ class _VistaInicioState extends State<VistaInicio> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Colors.black87, width: 2),
+                            borderSide: const BorderSide(
+                              color: Colors.black87,
+                              width: 2,
+                            ),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: Colors.grey,
+                          ),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
-                                  icon: const Icon(Icons.clear, color: Colors.grey),
+                                  icon: const Icon(
+                                    Icons.clear,
+                                    color: Colors.grey,
+                                  ),
                                   onPressed: () {
                                     _searchController.clear();
                                   },
@@ -318,7 +345,10 @@ class _VistaInicioState extends State<VistaInicio> {
                       height: 40,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: Colors.grey[300]!, width: 1.5),
+                        border: Border.all(
+                          color: Colors.grey[300]!,
+                          width: 1.5,
+                        ),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IconButton(
@@ -352,7 +382,7 @@ class _VistaInicioState extends State<VistaInicio> {
             nombreUsuario = nombre.split(' ').first;
           }
         }
-        
+
         return Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
           child: Column(
@@ -369,10 +399,7 @@ class _VistaInicioState extends State<VistaInicio> {
               const SizedBox(height: 8),
               Text(
                 '¿Qué tema quieres explorar hoy?',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -446,7 +473,11 @@ class _VistaInicioState extends State<VistaInicio> {
     );
   }
 
-  Widget _buildFilterChip(String label, {required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildFilterChip(
+    String label, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -519,7 +550,10 @@ class _VistaInicioState extends State<VistaInicio> {
                 ),
               if (canDelete)
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
                   title: const Text('Eliminar tópico'),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -545,7 +579,10 @@ class _VistaInicioState extends State<VistaInicio> {
   Future<void> _confirmDelete(Topico topico) async {
     final topicoId = topico.id;
     if (topicoId == null) {
-      SnackBarHelper.showErrorMessage(context, 'No se puede eliminar este tópico.');
+      SnackBarHelper.showErrorMessage(
+        context,
+        'No se puede eliminar este tópico.',
+      );
       return;
     }
 
@@ -554,7 +591,9 @@ class _VistaInicioState extends State<VistaInicio> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Eliminar tópico'),
-          content: const Text('¿Estás seguro de que deseas eliminar este tópico?'),
+          content: const Text(
+            '¿Estás seguro de que deseas eliminar este tópico?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -583,17 +622,17 @@ class _VistaInicioState extends State<VistaInicio> {
     final tiempoPublicacion = _formatTimeAgo(topico.fechaCreacion);
     final categoria = topico.curso?.nombre ?? 'General';
     final canEdit = canEditTopico(currentUser: _currentUser, topico: topico);
-    final canDelete = canDeleteTopico(currentUser: _currentUser, topico: topico);
+    final canDelete = canDeleteTopico(
+      currentUser: _currentUser,
+      topico: topico,
+    );
     final hasActions = canEdit || canDelete;
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey[300]!,
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.grey[300]!, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -622,14 +661,11 @@ class _VistaInicioState extends State<VistaInicio> {
                 // Header con avatar, username, tiempo y menú
                 Row(
                   children: [
-                    CircleAvatar(
+                    UserAvatar(
+                      userId: autor?.id,
                       radius: 20,
                       backgroundColor: Colors.grey[200],
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.grey[600],
-                        size: 20,
-                      ),
+                      iconColor: Colors.grey[600],
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -657,7 +693,11 @@ class _VistaInicioState extends State<VistaInicio> {
                     ),
                     if (hasActions)
                       IconButton(
-                        icon: Icon(Icons.more_vert, color: Colors.grey[600], size: 20),
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: Colors.grey[600],
+                          size: 20,
+                        ),
                         onPressed: () => _showTopicoActions(topico),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -665,38 +705,89 @@ class _VistaInicioState extends State<VistaInicio> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Título
-                Text(
-                  topico.titulo,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                    height: 1.3,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Mensaje truncado
-                Text(
-                  topico.mensaje,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                    height: 1.5,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+                // Contenido: Título + Mensaje a la izquierda, Imagen a la derecha
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Título y mensaje
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            topico.titulo,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              height: 1.3,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            topico.mensaje,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                              height: 1.5,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Imagen thumbnail a la derecha
+                    if (topico.fotoUrl != null &&
+                        topico.fotoUrl!.isNotEmpty) ...[
+                      const SizedBox(width: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          topico.fotoUrl!,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              color: Colors.grey[200],
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.grey[400],
+                                size: 24,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 12),
                 // Línea separadora
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Colors.grey[300],
-                ),
+                Divider(height: 1, thickness: 1, color: Colors.grey[300]),
                 const SizedBox(height: 12),
                 // Métricas de engagement
-                    Row(
+                Row(
                   children: [
                     _buildLikeButton(topico.id),
                     const SizedBox(width: 20),
@@ -704,7 +795,10 @@ class _VistaInicioState extends State<VistaInicio> {
                     const Spacer(),
                     // Tag de categoría
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
@@ -734,7 +828,10 @@ class _VistaInicioState extends State<VistaInicio> {
         stream: _likesService.getLikesCount(0),
         builder: (context, snapshot) {
           final count = snapshot.data ?? 0;
-          return _buildEngagementMetric(Icons.thumb_up_outlined, count.toString());
+          return _buildEngagementMetric(
+            Icons.thumb_up_outlined,
+            count.toString(),
+          );
         },
       );
     }
@@ -743,12 +840,12 @@ class _VistaInicioState extends State<VistaInicio> {
       stream: _likesService.getLikesCount(topicoId),
       builder: (context, countSnapshot) {
         final likesCount = countSnapshot.data ?? 0;
-        
+
         return FutureBuilder<bool>(
           future: _likesService.hasUserLiked(topicoId, _currentUserId!),
           builder: (context, likeSnapshot) {
             final isLiked = likeSnapshot.data ?? false;
-            
+
             return InkWell(
               onTap: () {
                 _likesService.likePost(topicoId, _currentUserId!);
@@ -853,6 +950,4 @@ class _VistaInicioState extends State<VistaInicio> {
       return 'Hace un momento';
     }
   }
-
 }
-

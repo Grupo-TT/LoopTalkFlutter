@@ -79,7 +79,9 @@ class LoopTalkServiceApi {
       return Usuario.fromJson(data);
     } else {
       final errorBody = jsonDecode(response.body);
-      throw Exception("Error en registro: ${response.statusCode}. Detalles: ${errorBody['message'] ?? response.body}");
+      throw Exception(
+        "Error en registro: ${response.statusCode}. Detalles: ${errorBody['message'] ?? response.body}",
+      );
     }
   }
 
@@ -112,9 +114,20 @@ class LoopTalkServiceApi {
     required int id,
     required String nombre,
     required String correo,
+    String? fotoUrl,
     required String token,
   }) async {
     final url = Uri.parse('$baseUrl/usuario/$id');
+
+    final Map<String, dynamic> body = {
+      "id": id,
+      "nombre": nombre,
+      "correoElectronico": correo,
+    };
+
+    if (fotoUrl != null) {
+      body["fotoUrl"] = fotoUrl;
+    }
 
     final response = await http
         .put(
@@ -123,11 +136,7 @@ class LoopTalkServiceApi {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
           },
-          body: jsonEncode({
-            "id": id,
-            "nombre": nombre,
-            "correoElectronico": correo,
-          }),
+          body: jsonEncode(body),
         )
         .timeout(
           _timeout,

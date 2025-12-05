@@ -10,6 +10,8 @@ import 'package:loop_talk/components/snackbar_helper.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import 'package:loop_talk/services/firebase_storage_service.dart';
+import 'package:loop_talk/services/firebase_profile_service.dart';
 
 class VistaEditarPerfil extends StatefulWidget {
   const VistaEditarPerfil({super.key});
@@ -24,6 +26,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
 
   final ImagePicker _picker = ImagePicker();
   XFile? _imagenSeleccionada;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -136,7 +139,12 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
   // ────────────────────────────────────────────────
   //   GUARDAR CAMBIOS – BLO C
   // ────────────────────────────────────────────────
-  void _guardarCambios() {
+  // ────────────────────────────────────────────────
+  //   GUARDAR CAMBIOS – BLO C
+  // ────────────────────────────────────────────────
+  Future<void> _guardarCambios() async {
+    if (_isUploading) return;
+
     final nombre = _nombreController.text.trim();
     final correo = _correoController.text.trim();
 
@@ -154,12 +162,54 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
       return;
     }
 
-    context.read<AuthBloc>().add(
-      UpdateProfileEvent(
-        nombre: nombre,
-        correoElectronico: correo,
-      ),
-    );
+    String? fotoUrl;
+    final authState = context.read<AuthBloc>().state;
+    final userId = (authState is AuthSuccess) ? authState.usuario.id : null;
+
+    if (_imagenSeleccionada != null) {
+      setState(() {
+        _isUploading = true;
+      });
+      try {
+        final storageService = FirebaseStorageService();
+        final fileName =
+            'profile_images/${DateTime.now().millisecondsSinceEpoch}_${_imagenSeleccionada!.name}';
+        fotoUrl = await storageService.uploadImage(
+          File(_imagenSeleccionada!.path),
+          fileName,
+        );
+
+        // Save photo URL to Firestore so other users can see it
+        if (userId != null && fotoUrl != null) {
+          final profileService = FirebaseProfileService();
+          await profileService.saveProfilePhoto(userId, fotoUrl);
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Error al subir imagen: $e")));
+        }
+        return;
+      }
+    }
+
+    if (mounted) {
+      context.read<AuthBloc>().add(
+        UpdateProfileEvent(
+          nombre: nombre,
+          correoElectronico: correo,
+          fotoUrl: fotoUrl,
+        ),
+      );
+      // Reset uploading state as Bloc will handle loading now
+      setState(() {
+        _isUploading = false;
+      });
+    }
   }
 
   // ────────────────────────────────────────────────
@@ -228,10 +278,23 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
             ),
             centerTitle: true,
             actions: [
-              IconButton(
-                icon: const Icon(Icons.check, color: Colors.white),
-                onPressed: isLoading ? null : _guardarCambios,
-              ),
+              if (isLoading || _isUploading)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                )
+              else
+                IconButton(
+                  icon: const Icon(Icons.check, color: Colors.white),
+                  onPressed: _guardarCambios,
+                ),
             ],
           ),
           body: ListView(

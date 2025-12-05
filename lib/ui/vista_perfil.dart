@@ -5,6 +5,7 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../components/user_avatar.dart';
 import 'vista_login.dart';
 import 'vista_editar_perfil.dart';
 import 'vista_cambiar_password.dart';
@@ -34,7 +35,9 @@ class _VistaPerfilState extends State<VistaPerfil> {
   void didUpdateWidget(covariant VistaPerfil oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!_profileTutorialSeen && widget.isActive && !oldWidget.isActive) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowProfileTutorial(),
+      );
     }
   }
 
@@ -44,7 +47,9 @@ class _VistaPerfilState extends State<VistaPerfil> {
     final seen = prefs.getBool('${_tutorialProfileKey}_$userId') ?? false;
     _profileTutorialSeen = seen;
     if (!seen && widget.isActive) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowProfileTutorial(),
+      );
     }
   }
 
@@ -53,7 +58,9 @@ class _VistaPerfilState extends State<VistaPerfil> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.error)));
         }
       },
       child: Scaffold(
@@ -78,7 +85,10 @@ class _VistaPerfilState extends State<VistaPerfil> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              border: Border.all(color: Colors.grey[300]!, width: 1.5),
+                              border: Border.all(
+                                color: Colors.grey[300]!,
+                                width: 1.5,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: IconButton(
@@ -121,46 +131,50 @@ class _VistaPerfilState extends State<VistaPerfil> {
                             child: Column(
                               children: [
                                 Container(
-                                  width: 80,
-                                  height: 80,
+                                  width: 84,
+                                  height: 84,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.black, width: 2),
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: 2,
+                                    ),
                                   ),
-                                  child: const Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color: Colors.black,
+                                  child: UserAvatarStream(
+                                    userId: usuario.id,
+                                    radius: 40,
+                                    backgroundColor: Colors.white,
+                                    iconColor: Colors.black,
                                   ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  usuario.nombre,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  usuario.correoElectronico,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              usuario.nombre,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              usuario.correoElectronico,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                    _buildSectionTitle('General'),
-                    const SizedBox(height: 12),
-                    _buildGeneralSection(context),
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Sesión'),
-                    const SizedBox(height: 12),
+                          ),
+                          const SizedBox(height: 32),
+                          _buildSectionTitle('General'),
+                          const SizedBox(height: 12),
+                          _buildGeneralSection(context),
+                          const SizedBox(height: 32),
+                          _buildSectionTitle('Sesión'),
+                          const SizedBox(height: 12),
                           _buildSessionSection(context),
                           const SizedBox(height: 20),
                         ],
@@ -185,7 +199,9 @@ class _VistaPerfilState extends State<VistaPerfil> {
       return;
     }
     if (_editProfileKey.currentContext == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowProfileTutorial());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowProfileTutorial(),
+      );
       return;
     }
 
@@ -314,11 +330,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
                     color: Colors.grey[200],
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.logout,
-                    size: 32,
-                    color: Colors.grey[700],
-                  ),
+                  child: Icon(Icons.logout, size: 32, color: Colors.grey[700]),
                 ),
                 const SizedBox(height: 20),
                 // Título
@@ -352,7 +364,10 @@ class _VistaPerfilState extends State<VistaPerfil> {
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: Colors.grey[300]!, width: 1.5),
+                          side: BorderSide(
+                            color: Colors.grey[300]!,
+                            width: 1.5,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -373,7 +388,9 @@ class _VistaPerfilState extends State<VistaPerfil> {
                           Navigator.of(dialogContext).pop();
                           context.read<AuthBloc>().add(LogoutEvent());
                           Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (context) => const VistaLogin()),
+                            MaterialPageRoute(
+                              builder: (context) => const VistaLogin(),
+                            ),
                             (route) => false,
                           );
                         },

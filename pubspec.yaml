@@ -28,6 +28,8 @@ dependencies:
   cloud_firestore: ^4.13.6
   flutter_native_splash: ^2.4.0
   bloc: ^9.0.1
+  avatar_glow: ^2.0.2
+  firebase_storage: ^11.6.5
 
 
 

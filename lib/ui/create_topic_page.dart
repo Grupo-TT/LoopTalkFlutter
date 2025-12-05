@@ -15,6 +15,12 @@ import 'package:loop_talk/bloc/topico_bloc.dart';
 import 'package:loop_talk/bloc/topico_event.dart';
 import 'package:loop_talk/model/topico.dart';
 import 'package:loop_talk/components/snackbar_helper.dart';
+import 'package:speech_to_text/speech_to_text.dart'
+    show SpeechToText, ListenMode;
+import 'package:avatar_glow/avatar_glow.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:loop_talk/services/firebase_storage_service.dart';
 
 class CreateTopicPage extends StatelessWidget {
   final Topico? initialTopico;
@@ -28,7 +34,9 @@ class CreateTopicPage extends StatelessWidget {
       body: BlocListener<CreateTopicBloc, CreateTopicState>(
         listener: (context, state) {
           if (state is CreateTopicSuccess) {
-            final message = state.isUpdate ? 'Tópico actualizado con éxito' : 'Tópico creado con éxito';
+            final message = state.isUpdate
+                ? 'Tópico actualizado con éxito'
+                : 'Tópico creado con éxito';
             SnackBarHelper.showSuccesssMessage(context, message);
             context.read<TopicoBloc>().add(LoadTopicos());
             Navigator.of(context).pop(state.topico);
@@ -64,6 +72,17 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
   List<Categoria> _allCategorias = [];
   bool get _isEditMode => widget.initialTopico != null;
 
+  final SpeechToText _speechToText = SpeechToText();
+  bool _speechEnabled = false;
+  bool _isListening = false;
+  String _textBeforeListening = '';
+
+  final ImagePicker _picker = ImagePicker();
+  final FirebaseStorageService _storageService = FirebaseStorageService();
+  bool _isUploadingImage = false;
+  String? _uploadedImageUrl;
+  File? _selectedImageFile;
+
   @override
   void initState() {
     super.initState();
@@ -76,12 +95,108 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
       _selectedCategoria = initial.curso;
     }
     _initConnectivity();
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    _speechEnabled = await _speechToText.initialize(
+      onStatus: (status) {
+        // Update button state when speech recognition stops
+        if (status == 'notListening' || status == 'done') {
+          if (mounted && _isListening) {
+            setState(() {
+              _isListening = false;
+            });
+          }
+        }
+      },
+    );
+    setState(() {});
+  }
+
+  void _startListening() async {
+    _textBeforeListening = _messageController.text;
+    await _speechToText.listen(
+      onResult: _onSpeechResult,
+      listenMode: ListenMode.dictation,
+      pauseFor: const Duration(seconds: 10),
+      listenFor: const Duration(minutes: 10),
+      partialResults: true,
+      cancelOnError: false,
+    );
+    setState(() {
+      _isListening = true;
+    });
+  }
+
+  void _stopListening() async {
+    await _speechToText.stop();
+    setState(() {
+      _isListening = false;
+    });
+  }
+
+  void _onSpeechResult(result) {
+    setState(() {
+      String newText = result.recognizedWords;
+      if (_textBeforeListening.isNotEmpty) {
+        _messageController.text = "$_textBeforeListening $newText";
+      } else {
+        _messageController.text = newText;
+      }
+    });
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedImageFile = File(image.path);
+          _isUploadingImage = true;
+        });
+
+        final fileName =
+            'topic_images/${DateTime.now().millisecondsSinceEpoch}_${image.name}';
+        final downloadUrl = await _storageService.uploadImage(
+          File(image.path),
+          fileName,
+        );
+
+        setState(() {
+          _uploadedImageUrl = downloadUrl;
+          _isUploadingImage = false;
+        });
+
+        if (mounted) {
+          SnackBarHelper.showSuccesssMessage(
+            context,
+            'Imagen subida correctamente',
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isUploadingImage = false;
+      });
+      if (mounted) {
+        SnackBarHelper.showErrorMessage(context, 'Error al subir imagen: $e');
+      }
+    }
   }
 
   Future<void> _initConnectivity() async {
     final result = await _connectivity.checkConnectivity();
     _updateOfflineStatus(result);
-    _connectivitySub = _connectivity.onConnectivityChanged.listen(_updateOfflineStatus);
+    _connectivitySub = _connectivity.onConnectivityChanged.listen(
+      _updateOfflineStatus,
+    );
   }
 
   void _updateOfflineStatus(ConnectivityResult result) {
@@ -157,7 +272,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
         children: [
           ColoredBox(
             color: Colors.white,
-        child: Column(
+            child: Column(
               children: [
                 // Header con usuario
                 _buildUserHeader(),
@@ -176,10 +291,18 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                           const SizedBox(height: 16),
                           // Campo de descripción
                           _buildDescriptionField(),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 16),
+                          // Vista previa de imagen seleccionada
+                          if (_selectedImageFile != null ||
+                              _isUploadingImage) ...[
+                            _buildImagePreview(),
+                            const SizedBox(height: 16),
+                          ],
                           // Sección de categorías
                           _buildCategorySection(),
-                          const SizedBox(height: 100), // Espacio para los botones inferiores
+                          const SizedBox(
+                            height: 100,
+                          ), // Espacio para los botones inferiores
                         ],
                       ),
                     ),
@@ -217,7 +340,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                       ),
                       child: const Column(
                         mainAxisSize: MainAxisSize.min,
-                        children:  [
+                        children: [
                           Icon(
                             Icons.wifi_off_rounded,
                             size: 48,
@@ -241,9 +364,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                             ),
                           ),
                           SizedBox(height: 24),
-                           CircularProgressIndicator(
-                            strokeWidth: 3,
-                          ),
+                          CircularProgressIndicator(strokeWidth: 3),
                         ],
                       ),
                     ),
@@ -272,9 +393,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: const BoxDecoration(
             color: Colors.white,
-            border: Border(
-              bottom: BorderSide(color: Colors.grey, width: 0.5),
-            ),
+            border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
           ),
           child: Row(
             children: [
@@ -294,11 +413,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                   color: Colors.grey[300],
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.person,
-                  color: Colors.grey[600],
-                  size: 24,
-                ),
+                child: Icon(Icons.person, color: Colors.grey[600], size: 24),
               ),
               const SizedBox(width: 12),
               // Username
@@ -326,7 +441,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
       child: TextFormField(
         controller: _titleController,
         decoration: InputDecoration(
-          hintText: 'Que tienes en mente?',
+          hintText: '¿Qué tienes en mente?',
           hintStyle: TextStyle(color: Colors.grey[500]),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -334,12 +449,12 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
           ),
           filled: true,
           fillColor: Colors.grey[100],
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.black87,
-        ),
+        style: const TextStyle(fontSize: 16, color: Colors.black87),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Por favor ingresa un título';
@@ -357,32 +472,120 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
       ),
-      child: TextFormField(
-        controller: _messageController,
-        decoration: InputDecoration(
-          hintText: 'Descripción',
-          hintStyle: TextStyle(color: Colors.grey[500]),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+      child: Stack(
+        children: [
+          TextFormField(
+            controller: _messageController,
+            decoration: InputDecoration(
+              hintText: 'Descripción',
+              hintStyle: TextStyle(color: Colors.grey[500]),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey[100],
+              contentPadding: const EdgeInsets.all(16),
+            ),
+            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            maxLines: null,
+            expands: true,
+            textAlignVertical: TextAlignVertical.top,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Por favor ingresa una descripción';
+              }
+              return null;
+            },
           ),
-          filled: true,
-          fillColor: Colors.grey[100],
-          contentPadding: const EdgeInsets.all(16),
-        ),
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.black87,
-        ),
-        maxLines: null,
-        expands: true,
-        textAlignVertical: TextAlignVertical.top,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Por favor ingresa una descripción';
-          }
-          return null;
-        },
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: AvatarGlow(
+              endRadius: 40.0,
+              animate: _isListening,
+              glowColor: Colors.red,
+              duration: const Duration(milliseconds: 2000),
+              repeat: true,
+              child: FloatingActionButton.small(
+                onPressed: _speechEnabled
+                    ? (_isListening ? _stopListening : _startListening)
+                    : null,
+                backgroundColor: _isListening ? Colors.red : Colors.blue,
+                child: Icon(
+                  _isListening ? Icons.mic_off : Icons.mic,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImagePreview() {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Stack(
+        children: [
+          if (_selectedImageFile != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: Image.file(
+                _selectedImageFile!,
+                width: double.infinity,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
+            ),
+          if (_isUploadingImage)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 8),
+                    Text(
+                      'Subiendo imagen...',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (!_isUploadingImage && _selectedImageFile != null)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedImageFile = null;
+                    _uploadedImageUrl = null;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 16),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -391,7 +594,8 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
     return BlocBuilder<CategoriaBloc, CategoriaState>(
       builder: (context, categoriaState) {
         if (categoriaState is CategoriaLoaded) {
-          if (_allCategorias.isEmpty || _allCategorias.length != categoriaState.categorias.length) {
+          if (_allCategorias.isEmpty ||
+              _allCategorias.length != categoriaState.categorias.length) {
             _allCategorias = categoriaState.categorias;
             _filteredCategorias = categoriaState.categorias;
           }
@@ -428,12 +632,12 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                   ),
                   filled: true,
                   fillColor: Colors.grey[100],
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
               ),
             ),
             const SizedBox(height: 16),
@@ -452,7 +656,8 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                       itemCount: _filteredCategorias.length,
                       itemBuilder: (context, index) {
                         final categoria = _filteredCategorias[index];
-                        final isSelected = _selectedCategoria?.id == categoria.id;
+                        final isSelected =
+                            _selectedCategoria?.id == categoria.id;
                         return Padding(
                           padding: const EdgeInsets.only(right: 12),
                           child: _buildCategoryChip(categoria, isSelected),
@@ -504,11 +709,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              const Icon(
-                Icons.check,
-                size: 18,
-                color: Colors.white,
-              ),
+              const Icon(Icons.check, size: 18, color: Colors.white),
             ],
           ],
         ),
@@ -521,9 +722,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Colors.grey[300]!, width: 0.5),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey[300]!, width: 0.5)),
       ),
       child: SafeArea(
         top: false,
@@ -539,14 +738,20 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                 border: Border.all(color: Colors.black, width: 1.5),
               ),
               child: IconButton(
-                icon: const Icon(Icons.add_photo_alternate, color: Colors.black87),
-                onPressed: () {
-                  
-                  SnackBarHelper.showInfoMessage(
-                    context,
-                    'Funcionalidad de imagen próximamente',
-                  );
-                },
+                icon: _isUploadingImage
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black87,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.add_photo_alternate,
+                        color: Colors.black87,
+                      ),
+                onPressed: _isUploadingImage ? null : _pickAndUploadImage,
               ),
             ),
             const Spacer(),
@@ -559,7 +764,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                   width: 120,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: isLoading
+                    onPressed: isLoading || _isUploadingImage
                         ? null
                         : () {
                             if (_formKey.currentState?.validate() ?? false) {
@@ -580,22 +785,23 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                                   return;
                                 }
                                 context.read<CreateTopicBloc>().add(
-                                      UpdateTopicSubmitted(
-                                        topicoId: topicoId,
-                                        titulo: _titleController.text,
-                                        mensaje: _messageController.text,
-                                        idCurso: _selectedCategoria!.id!,
-                                        estado: widget.initialTopico?.estado,
-                                      ),
-                                    );
+                                  UpdateTopicSubmitted(
+                                    topicoId: topicoId,
+                                    titulo: _titleController.text,
+                                    mensaje: _messageController.text,
+                                    idCurso: _selectedCategoria!.id!,
+                                    estado: widget.initialTopico?.estado,
+                                  ),
+                                );
                               } else {
                                 context.read<CreateTopicBloc>().add(
-                                      CreateTopicSubmitted(
-                                        titulo: _titleController.text,
-                                        mensaje: _messageController.text,
-                                        idCurso: _selectedCategoria!.id!,
-                                      ),
-                                    );
+                                  CreateTopicSubmitted(
+                                    titulo: _titleController.text,
+                                    mensaje: _messageController.text,
+                                    idCurso: _selectedCategoria!.id!,
+                                    fotoUrl: _uploadedImageUrl,
+                                  ),
+                                );
                               }
                             }
                           },
@@ -613,7 +819,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : Text(

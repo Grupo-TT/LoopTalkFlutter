@@ -37,11 +37,16 @@ class RefreshAuth extends AuthEvent {}
 class UpdateProfileEvent extends AuthEvent {
   final String nombre;
   final String correoElectronico;
+  final String? fotoUrl;
 
-  UpdateProfileEvent({required this.nombre, required this.correoElectronico});
+  UpdateProfileEvent({
+    required this.nombre,
+    required this.correoElectronico,
+    this.fotoUrl,
+  });
 
   @override
-  List<Object?> get props => [nombre, correoElectronico];
+  List<Object?> get props => [nombre, correoElectronico, fotoUrl];
 }
 
 /// Evento para actualizar contraseña del usuario
