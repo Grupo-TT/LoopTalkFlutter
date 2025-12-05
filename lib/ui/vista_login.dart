@@ -84,7 +84,7 @@ class _VistaLoginState extends State<VistaLogin> {
                     height: alto * 0.25,
                     child: Center(
                       child: Image.asset(
-                        "assets/icon.png",
+                        "assets/logo.png",
                         fit: BoxFit.contain,
                       ),
                     ),
