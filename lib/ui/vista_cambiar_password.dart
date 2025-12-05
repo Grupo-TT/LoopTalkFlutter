@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 
 class VistaCambiarPassword extends StatefulWidget {
   const VistaCambiarPassword({super.key});
@@ -23,7 +24,6 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
   bool _obscureNuevaPassword = true;
   bool _obscureConfirmarPassword = true;
 
-  
   bool _tieneMinimoCaracteres = false;
   bool _tieneMayusculasYNumeros = false;
   bool _esDiferente = false;
@@ -102,12 +102,12 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.scaffoldBg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -148,25 +148,31 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: obscureText,
+          style: const TextStyle(color: AppColors.textPrimary),
           decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.inputBg,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.black87, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.accentGreen,
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -177,7 +183,7 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
                 obscureText
                     ? Icons.visibility_outlined
                     : Icons.visibility_off_outlined,
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
               ),
               onPressed: onToggleVisibility,
             ),
@@ -191,19 +197,19 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Tu contraseña debe:',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -256,15 +262,15 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             'Ingresa tu contraseña actual y crea una nueva para tu cuenta.',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
               height: 1.4,
             ),
           ),
@@ -315,8 +321,8 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
             child: ElevatedButton(
               onPressed: _esFormularioValido() ? _actualizarPassword : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black87,
-                disabledBackgroundColor: Colors.grey[300],
+                backgroundColor: AppColors.accentGreen,
+                disabledBackgroundColor: AppColors.surfaceBg,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -324,7 +330,7 @@ class _VistaCambiarPasswordState extends State<VistaCambiarPassword> {
               child: const Text(
                 'Actualizar',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.scaffoldBg,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),

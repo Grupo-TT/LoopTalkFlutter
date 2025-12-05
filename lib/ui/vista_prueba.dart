@@ -11,6 +11,7 @@ import '../model/topico.dart';
 import '../model/comentario.dart';
 import '../services/firebase_likes_service.dart';
 import '../repository/comentario_service.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 
 class VistaPrueba extends StatefulWidget {
   final GlobalKey? navBarKey;
@@ -40,7 +41,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
   void didUpdateWidget(covariant VistaPrueba oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!_statsTutorialSeen && widget.isActive && !oldWidget.isActive) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStatsTutorial());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowStatsTutorial(),
+      );
     }
   }
 
@@ -52,7 +55,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
       _statsTutorialSeen = seen;
     });
     if (!seen && widget.isActive) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStatsTutorial());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowStatsTutorial(),
+      );
     }
   }
 
@@ -65,11 +70,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
   }
 
   void _maybeShowStatsTutorial() {
-    if (!mounted || _statsTutorialSeen || !widget.isActive || widget.navBarKey == null) {
+    if (!mounted ||
+        _statsTutorialSeen ||
+        !widget.isActive ||
+        widget.navBarKey == null) {
       return;
     }
     if (widget.navBarKey!.currentContext == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowStatsTutorial());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowStatsTutorial(),
+      );
       return;
     }
 
@@ -84,7 +94,8 @@ class _VistaPruebaState extends State<VistaPrueba> {
             align: ContentAlign.top,
             builder: (context, controller) => _buildTutorialContent(
               title: 'Estadísticas',
-              description: 'Aquí puedes ver tus estadísticas más relevantes: loops creados, actividad, escritura, categorías y engagement.',
+              description:
+                  'Aquí puedes ver tus estadísticas más relevantes: loops creados, actividad, escritura, categorías y engagement.',
               onNext: controller.next,
             ),
           ),
@@ -113,7 +124,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -132,7 +143,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -140,7 +151,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             description,
             style: const TextStyle(
               fontSize: 14,
-              color: Colors.black54,
+              color: AppColors.textSecondary,
               height: 1.4,
             ),
           ),
@@ -169,7 +180,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBg,
       body: SafeArea(
         child: BlocListener<TopicoBloc, TopicoState>(
           listener: (context, state) {
@@ -187,7 +198,10 @@ class _VistaPruebaState extends State<VistaPrueba> {
                     context.read<TopicoBloc>().add(LoadTopicos());
                   },
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 16.0,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -197,16 +211,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                             letterSpacing: -0.5,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
+                        const Text(
                           'Resumen de tu actividad en LoopTalk',
                           style: TextStyle(
                             fontSize: 15,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -238,9 +252,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
                   ),
                 );
               } else {
-                return const Center(
-                  child: Text('No hay usuario autenticado'),
-                );
+                return const Center(child: Text('No hay usuario autenticado'));
               }
             },
           ),
@@ -255,7 +267,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
         var value = '--';
 
         if (state is TopicoLoaded) {
-          final userTopicos = state.topicos.where((t) => t.autor?.id == userId).length;
+          final userTopicos = state.topicos
+              .where((t) => t.autor?.id == userId)
+              .length;
           value = userTopicos.toString();
         } else if (state is TopicoLoading || state is TopicoActionInProgress) {
           value = '...';
@@ -283,9 +297,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -298,11 +312,11 @@ class _VistaPruebaState extends State<VistaPrueba> {
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceBg,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 28, color: Colors.black87),
+            child: Icon(icon, size: 28, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 16),
           Text(
@@ -310,16 +324,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
               letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -336,7 +350,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
       style: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: Colors.black87,
+        color: AppColors.textPrimary,
         letterSpacing: -0.3,
       ),
     );
@@ -349,9 +363,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -374,9 +388,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -385,28 +399,25 @@ class _VistaPruebaState extends State<VistaPrueba> {
                 ),
               ],
             ),
-            child: Center(
+            child: const Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.insights, size: 48, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
+                  Icon(Icons.insights, size: 48, color: AppColors.textMuted),
+                  SizedBox(height: 16),
                   Text(
                     'Aún no has creado loops',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
+                      color: AppColors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'Comparte tu primera idea para ver aquí tu actividad.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -420,9 +431,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBg,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!, width: 1),
+            border: Border.all(color: AppColors.border, width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
@@ -436,14 +447,14 @@ class _VistaPruebaState extends State<VistaPrueba> {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.timeline, size: 20, color: Colors.black87),
-                   SizedBox(width: 8),
-                   Text(
+                  Icon(Icons.timeline, size: 20, color: AppColors.textPrimary),
+                  SizedBox(width: 8),
+                  Text(
                     'Loops por mes',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -451,7 +462,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
               const SizedBox(height: 20),
               ...timelineEntries.asMap().entries.map(
                 (entry) => Padding(
-                  padding: EdgeInsets.only(bottom: entry.key < timelineEntries.length - 1 ? 14 : 0),
+                  padding: EdgeInsets.only(
+                    bottom: entry.key < timelineEntries.length - 1 ? 14 : 0,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -459,15 +472,18 @@ class _VistaPruebaState extends State<VistaPrueba> {
                           entry.value.period,
                           style: const TextStyle(
                             fontSize: 15,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -475,7 +491,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: AppColors.scaffoldBg,
                           ),
                         ),
                       ),
@@ -492,21 +508,20 @@ class _VistaPruebaState extends State<VistaPrueba> {
 
   List<_TimelineEntry> _buildMonthlyTimeline(List<Topico> topicos) {
     final Map<String, int> counts = {};
-    
+
     for (final topico in topicos) {
       final fecha = topico.fechaCreacion;
       if (fecha == null) continue;
-      
+
       final date = DateTime.tryParse(fecha);
       if (date == null) continue;
-      
+
       final key = '${date.year}-${date.month.toString().padLeft(2, '0')}';
       counts[key] = (counts[key] ?? 0) + 1;
     }
 
-    final sortedKeys = counts.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
-    
+    final sortedKeys = counts.keys.toList()..sort((a, b) => b.compareTo(a));
+
     final latest = sortedKeys.take(6).toList();
 
     return latest.map((key) {
@@ -544,9 +559,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -569,9 +584,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -583,7 +598,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             child: const Center(
               child: Text(
                 'Aún no has creado loops para calcular estadísticas de escritura.',
-                style: TextStyle(fontSize: 13, color: Colors.black54),
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -595,9 +610,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBg,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!, width: 1),
+            border: Border.all(color: AppColors.border, width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
@@ -611,14 +626,14 @@ class _VistaPruebaState extends State<VistaPrueba> {
             children: [
               const Row(
                 children: [
-                  Icon(Icons.edit_note, size: 20, color: Colors.black87),
-                   SizedBox(width: 8),
-                   Text(
+                  Icon(Icons.edit_note, size: 20, color: AppColors.textPrimary),
+                  SizedBox(width: 8),
+                  Text(
                     'Estadísticas de escritura',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -630,7 +645,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
                 icon: Icons.text_fields,
               ),
               const SizedBox(height: 16),
-              Divider(height: 1, color: Colors.grey[200]),
+              const Divider(height: 1, color: AppColors.border),
               const SizedBox(height: 16),
               _buildWordsStatRow(
                 label: 'Promedio por loop',
@@ -638,7 +653,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
                 icon: Icons.bar_chart,
               ),
               const SizedBox(height: 16),
-              Divider(height: 1, color: Colors.grey[200]),
+              const Divider(height: 1, color: AppColors.border),
               const SizedBox(height: 16),
               _buildWordsStatRow(
                 label: 'Loop más largo',
@@ -662,10 +677,10 @@ class _VistaPruebaState extends State<VistaPrueba> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: AppColors.surfaceBg,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: Colors.black87),
+          child: Icon(icon, size: 18, color: AppColors.textPrimary),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -673,7 +688,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             label,
             style: const TextStyle(
               fontSize: 15,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -683,7 +698,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -698,14 +713,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
       final wordsInTitle = _countWords(topico.titulo);
       final wordsInMessage = _countWords(topico.mensaje);
       final totalWordsInTopico = wordsInTitle + wordsInMessage;
-      
+
       totalWords += totalWordsInTopico;
       if (totalWordsInTopico > maxWords) {
         maxWords = totalWordsInTopico;
       }
     }
 
-    final averageWords = topicos.isEmpty ? 0 : (totalWords / topicos.length).round();
+    final averageWords = topicos.isEmpty
+        ? 0
+        : (totalWords / topicos.length).round();
 
     return _WordsStats(
       totalWords: totalWords,
@@ -726,9 +743,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -751,9 +768,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -765,7 +782,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             child: const Center(
               child: Text(
                 'Aún no has creado loops para ver la distribución por categorías.',
-                style: TextStyle(fontSize: 13, color: Colors.black54),
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -778,9 +795,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -792,7 +809,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             child: const Center(
               child: Text(
                 'Tus loops no tienen categorías asignadas.',
-                style: TextStyle(fontSize: 13, color: Colors.black54),
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -802,9 +819,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBg,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!, width: 1),
+            border: Border.all(color: AppColors.border, width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
@@ -816,16 +833,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const  Row(
+              const Row(
                 children: [
-                  Icon(Icons.category, size: 20, color: Colors.black87),
-                   SizedBox(width: 8),
-                 Text(
+                  Icon(Icons.category, size: 20, color: AppColors.textPrimary),
+                  SizedBox(width: 8),
+                  Text(
                     'Loops por categoría',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -834,45 +851,56 @@ class _VistaPruebaState extends State<VistaPrueba> {
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: categoryStats.map(
-                  (stat) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.grey[200]!, width: 1.5),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          stat.categoryName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
+                children: categoryStats
+                    .map(
+                      (stat) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceBg,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: AppColors.border,
+                            width: 1.5,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text(
-                            '${stat.count}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              stat.categoryName,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.textPrimary,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                '${stat.count}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.scaffoldBg,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ).toList(),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
           ),
@@ -917,9 +945,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -942,9 +970,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -956,7 +984,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             child: const Center(
               child: Text(
                 'Aún no has creado loops para calcular engagement.',
-                style: TextStyle(fontSize: 13, color: Colors.black54),
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -964,14 +992,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
         }
 
         return FutureBuilder<_EngagementStats>(
-          key: ValueKey('engagement_${userTopicos.length}_${userTopicos.map((t) => t.id).join(',')}'),
+          key: ValueKey(
+            'engagement_${userTopicos.length}_${userTopicos.map((t) => t.id).join(',')}',
+          ),
           future: _calculateEngagementStats(userTopicos),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                  border: Border.all(color: AppColors.border, width: 1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Center(
@@ -984,7 +1014,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
               return Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                  border: Border.all(color: AppColors.border, width: 1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -997,14 +1027,15 @@ class _VistaPruebaState extends State<VistaPrueba> {
               );
             }
 
-            final stats = snapshot.data ?? _EngagementStats(likes: 0, comments: 0);
+            final stats =
+                snapshot.data ?? _EngagementStats(likes: 0, comments: 0);
 
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[200]!, width: 1),
+                border: Border.all(color: AppColors.border, width: 1),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -1016,16 +1047,20 @@ class _VistaPruebaState extends State<VistaPrueba> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const  Row(
+                  const Row(
                     children: [
-                      Icon(Icons.favorite, size: 20, color: Colors.black87),
-                       SizedBox(width: 8),
-                       Text(
+                      Icon(
+                        Icons.favorite,
+                        size: 20,
+                        color: AppColors.textPrimary,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
                         'Interacción recibida',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -1037,7 +1072,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
                     value: '${stats.likes}',
                   ),
                   const SizedBox(height: 16),
-                  Divider(height: 1, color: Colors.grey[200]),
+                  const Divider(height: 1, color: AppColors.border),
                   const SizedBox(height: 16),
                   _buildEngagementRow(
                     icon: Icons.chat_bubble_outline,
@@ -1063,10 +1098,10 @@ class _VistaPruebaState extends State<VistaPrueba> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: AppColors.surfaceBg,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: Colors.black87),
+          child: Icon(icon, size: 18, color: AppColors.textPrimary),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -1074,7 +1109,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             label,
             style: const TextStyle(
               fontSize: 15,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1084,17 +1119,19 @@ class _VistaPruebaState extends State<VistaPrueba> {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
     );
   }
 
-  Future<_EngagementStats> _calculateEngagementStats(List<Topico> topicos) async {
+  Future<_EngagementStats> _calculateEngagementStats(
+    List<Topico> topicos,
+  ) async {
     final likesService = FirebaseLikesService();
     final comentarioService = ComentarioService();
-    
+
     int totalLikes = 0;
     int totalComments = 0;
 
@@ -1115,10 +1152,12 @@ class _VistaPruebaState extends State<VistaPrueba> {
 
       // Obtener comentarios
       try {
-        final comentarios = await comentarioService.obtenerRespuestas(topico.id!).timeout(
-          const Duration(seconds: 5),
-          onTimeout: () => <Comentario>[],
-        );
+        final comentarios = await comentarioService
+            .obtenerRespuestas(topico.id!)
+            .timeout(
+              const Duration(seconds: 5),
+              onTimeout: () => <Comentario>[],
+            );
         totalComments += comentarios.length;
       } catch (e) {
         // Si hay error, continuar con el siguiente
@@ -1135,9 +1174,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -1160,9 +1199,9 @@ class _VistaPruebaState extends State<VistaPrueba> {
           return Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -1174,7 +1213,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             child: const Center(
               child: Text(
                 'Aún no has creado loops para ver tu actividad reciente.',
-                style: TextStyle(fontSize: 13, color: Colors.black54),
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -1188,7 +1227,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
               return Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                  border: Border.all(color: AppColors.border, width: 1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Center(
@@ -1197,18 +1236,20 @@ class _VistaPruebaState extends State<VistaPrueba> {
               );
             }
 
-            final activityInfo = snapshot.data ?? _RecentActivityInfo(
-              loopsThisWeek: 0,
-              lastLoopDays: 0,
-              lastLoopDate: null,
-            );
+            final activityInfo =
+                snapshot.data ??
+                _RecentActivityInfo(
+                  loopsThisWeek: 0,
+                  lastLoopDays: 0,
+                  lastLoopDate: null,
+                );
 
             return Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[200]!, width: 1),
+                border: Border.all(color: AppColors.border, width: 1),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -1222,14 +1263,18 @@ class _VistaPruebaState extends State<VistaPrueba> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.update, size: 20, color: Colors.black87),
-                       SizedBox(width: 8),
-                       Text(
+                      Icon(
+                        Icons.update,
+                        size: 20,
+                        color: AppColors.textPrimary,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
                         'Resumen de actividad',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -1238,15 +1283,21 @@ class _VistaPruebaState extends State<VistaPrueba> {
                   if (activityInfo.loopsThisWeek > 0)
                     _buildActivityRow(
                       icon: Icons.calendar_today,
-                      text: 'Has creado ${activityInfo.loopsThisWeek} loop${activityInfo.loopsThisWeek == 1 ? '' : 's'} esta semana',
+                      text:
+                          'Has creado ${activityInfo.loopsThisWeek} loop${activityInfo.loopsThisWeek == 1 ? '' : 's'} esta semana',
                     ),
-                  if (activityInfo.loopsThisWeek > 0) const SizedBox(height: 16),
                   if (activityInfo.loopsThisWeek > 0)
-                    Divider(height: 1, color: Colors.grey[200]),
-                  if (activityInfo.loopsThisWeek > 0) const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                  if (activityInfo.loopsThisWeek > 0)
+                    const Divider(height: 1, color: AppColors.border),
+                  if (activityInfo.loopsThisWeek > 0)
+                    const SizedBox(height: 16),
                   _buildActivityRow(
                     icon: Icons.access_time,
-                    text: _buildLastLoopText(activityInfo.lastLoopDays, activityInfo.lastLoopDate),
+                    text: _buildLastLoopText(
+                      activityInfo.lastLoopDays,
+                      activityInfo.lastLoopDate,
+                    ),
                   ),
                 ],
               ),
@@ -1257,19 +1308,16 @@ class _VistaPruebaState extends State<VistaPrueba> {
     );
   }
 
-  Widget _buildActivityRow({
-    required IconData icon,
-    required String text,
-  }) {
+  Widget _buildActivityRow({required IconData icon, required String text}) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: AppColors.surfaceBg,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: Colors.black87),
+          child: Icon(icon, size: 18, color: AppColors.textPrimary),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -1277,7 +1325,7 @@ class _VistaPruebaState extends State<VistaPrueba> {
             text,
             style: const TextStyle(
               fontSize: 15,
-              color: Colors.black87,
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1309,20 +1357,24 @@ class _VistaPruebaState extends State<VistaPrueba> {
     }
   }
 
-  Future<_RecentActivityInfo> _calculateRecentActivity(List<Topico> topicos, int userId) async {
+  Future<_RecentActivityInfo> _calculateRecentActivity(
+    List<Topico> topicos,
+    int userId,
+  ) async {
     // Guardar la fecha de última visita
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
     await prefs.setString('last_visit_$userId', now.toIso8601String());
 
     // Obtener fechas de creación y ordenarlas
-    final dates = topicos
-        .map((t) => t.fechaCreacion)
-        .whereType<String>()
-        .map((fecha) => DateTime.tryParse(fecha))
-        .whereType<DateTime>()
-        .toList()
-      ..sort((a, b) => b.compareTo(a));
+    final dates =
+        topicos
+            .map((t) => t.fechaCreacion)
+            .whereType<String>()
+            .map((fecha) => DateTime.tryParse(fecha))
+            .whereType<DateTime>()
+            .toList()
+          ..sort((a, b) => b.compareTo(a));
 
     if (dates.isEmpty) {
       return _RecentActivityInfo(
@@ -1396,4 +1448,3 @@ class _TimelineEntry {
 
   _TimelineEntry({required this.period, required this.count});
 }
-

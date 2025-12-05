@@ -15,6 +15,7 @@ import 'package:loop_talk/bloc/topico_bloc.dart';
 import 'package:loop_talk/bloc/topico_event.dart';
 import 'package:loop_talk/model/topico.dart';
 import 'package:loop_talk/components/snackbar_helper.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,7 +30,7 @@ class CreateTopicPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBg,
       body: BlocListener<CreateTopicBloc, CreateTopicState>(
         listener: (context, state) {
           if (state is CreateTopicSuccess) {
@@ -267,7 +268,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
       child: Stack(
         children: [
           ColoredBox(
-            color: Colors.white,
+            color: AppColors.scaffoldBg,
             child: Column(
               children: [
                 // Header con usuario
@@ -388,14 +389,16 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5)),
+            color: AppColors.cardBg,
+            border: Border(
+              bottom: BorderSide(color: AppColors.border, width: 0.5),
+            ),
           ),
           child: Row(
             children: [
               // Botón de cancelar
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.black87),
+                icon: const Icon(Icons.close, color: AppColors.textPrimary),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -405,11 +408,15 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                decoration: const BoxDecoration(
+                  color: AppColors.surfaceBg,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.person, color: Colors.grey[600], size: 24),
+                child: const Icon(
+                  Icons.person,
+                  color: AppColors.textSecondary,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               // Username
@@ -418,7 +425,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -438,19 +445,19 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
         controller: _titleController,
         decoration: InputDecoration(
           hintText: '¿Qué tienes en mente?',
-          hintStyle: TextStyle(color: Colors.grey[500]),
+          hintStyle: const TextStyle(color: AppColors.textMuted),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           filled: true,
-          fillColor: Colors.grey[100],
+          fillColor: AppColors.inputBg,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
           ),
         ),
-        style: const TextStyle(fontSize: 16, color: Colors.black87),
+        style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Por favor ingresa un título';
@@ -474,16 +481,16 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
             controller: _messageController,
             decoration: InputDecoration(
               hintText: 'Descripción',
-              hintStyle: TextStyle(color: Colors.grey[500]),
+              hintStyle: const TextStyle(color: AppColors.textMuted),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: AppColors.inputBg,
               contentPadding: const EdgeInsets.all(16),
             ),
-            style: const TextStyle(fontSize: 16, color: Colors.black87),
+            style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
             maxLines: null,
             expands: true,
             textAlignVertical: TextAlignVertical.top,
@@ -524,9 +531,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
     return Container(
       height: 120,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.inputBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.border),
       ),
       child: Stack(
         children: [
@@ -606,34 +613,40 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
             // Barra de búsqueda
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.inputBg,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
                 controller: _categorySearchController,
                 decoration: InputDecoration(
                   hintText: 'Buscar categoria...',
-                  hintStyle: TextStyle(color: Colors.grey[500]),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+                  hintStyle: const TextStyle(color: AppColors.textMuted),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.textSecondary,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: Colors.grey[100],
+                  fillColor: AppColors.inputBg,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 14,
                   ),
                 ),
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -641,10 +654,10 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
             SizedBox(
               height: 50,
               child: _filteredCategorias.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Text(
                         'No se encontraron categorías',
-                        style: TextStyle(color: Colors.grey[500]),
+                        style: TextStyle(color: AppColors.textMuted),
                       ),
                     )
                   : ListView.builder(
@@ -677,10 +690,10 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.grey[800] : Colors.white,
+          color: isSelected ? AppColors.accentGreen : AppColors.cardBg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.grey[800]! : Colors.black,
+            color: isSelected ? AppColors.accentGreen : AppColors.border,
             width: 1.5,
           ),
         ),
@@ -691,7 +704,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
               _getCategoryIcon(categoria.nombre),
               size: 20,
               color: isSelected
-                  ? Colors.white
+                  ? AppColors.scaffoldBg
                   : _getCategoryIconColor(categoria.nombre),
             ),
             const SizedBox(width: 8),
@@ -700,12 +713,14 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : Colors.black87,
+                color: isSelected
+                    ? AppColors.scaffoldBg
+                    : AppColors.textPrimary,
               ),
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              const Icon(Icons.check, size: 18, color: Colors.white),
+              const Icon(Icons.check, size: 18, color: AppColors.scaffoldBg),
             ],
           ],
         ),
@@ -716,9 +731,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
   Widget _buildBottomActions() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[300]!, width: 0.5)),
+      decoration: const BoxDecoration(
+        color: AppColors.cardBg,
+        border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
       ),
       child: SafeArea(
         top: false,
@@ -729,9 +744,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.black, width: 1.5),
+                border: Border.all(color: AppColors.border, width: 1.5),
               ),
               child: IconButton(
                 icon: _isUploadingImage
@@ -740,12 +755,12 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                         height: 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       )
                     : const Icon(
                         Icons.add_photo_alternate,
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                       ),
                 onPressed: _isUploadingImage ? null : _pickAndUploadImage,
               ),

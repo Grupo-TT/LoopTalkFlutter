@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 import '../model/topico.dart';
 import '../model/comentario.dart';
 import '../model/usuario.dart';
@@ -214,7 +215,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
           ),
         ],
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.scaffoldBg,
           body: SafeArea(
             bottom: false,
             child: Column(
@@ -234,8 +235,8 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                             UserAvatar(
                               userId: autor?.id,
                               radius: 20,
-                              backgroundColor: Colors.grey[200],
-                              iconColor: Colors.grey[600],
+                              backgroundColor: AppColors.surfaceBg,
+                              iconColor: AppColors.textSecondary,
                             ),
                             const SizedBox(width: 12),
                             // Username y fecha debajo
@@ -248,15 +249,15 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     'Publicado $tiempoPublicacion',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -270,7 +271,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                                   IconButton(
                                     icon: const Icon(
                                       Icons.more_vert,
-                                      color: Colors.black87,
+                                      color: AppColors.textPrimary,
                                       size: 24,
                                     ),
                                     padding: EdgeInsets.zero,
@@ -283,7 +284,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                                 IconButton(
                                   icon: const Icon(
                                     Icons.close,
-                                    color: Colors.black87,
+                                    color: AppColors.textPrimary,
                                     size: 24,
                                   ),
                                   padding: EdgeInsets.zero,
@@ -303,7 +304,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -314,16 +315,19 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: AppColors.cardBg,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.black, width: 1),
+                            border: Border.all(
+                              color: AppColors.border,
+                              width: 1,
+                            ),
                           ),
                           child: Text(
                             '#$categoria',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey[700],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -333,7 +337,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                           _topicoActual.mensaje,
                           style: const TextStyle(
                             fontSize: 16,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -349,7 +353,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey[300]!),
+                                border: Border.all(color: AppColors.border),
                               ),
                               child: Stack(
                                 children: [
@@ -443,7 +447,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -540,9 +544,9 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
             return Container(
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[800]!, width: 1.5),
+                border: Border.all(color: AppColors.border, width: 1.5),
               ),
               child: InkWell(
                 onTap: () {
@@ -560,14 +564,18 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                       Icon(
                         isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
                         size: 18,
-                        color: isLiked ? Colors.blueAccent : Colors.grey[800],
+                        color: isLiked
+                            ? AppColors.likeActive
+                            : AppColors.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         likesCount.toString(),
                         style: TextStyle(
                           fontSize: 14,
-                          color: isLiked ? Colors.blueAccent : Colors.grey[800],
+                          color: isLiked
+                              ? AppColors.likeActive
+                              : AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -609,8 +617,8 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
               UserAvatar(
                 userId: autor?.id,
                 radius: 18,
-                backgroundColor: Colors.grey[200],
-                iconColor: Colors.grey[600],
+                backgroundColor: AppColors.surfaceBg,
+                iconColor: AppColors.textSecondary,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -625,15 +633,15 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           tiempoPublicacion,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -644,7 +652,7 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                       comentario.contenido,
                       style: const TextStyle(
                         fontSize: 15,
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                         height: 1.5,
                       ),
                     ),
@@ -686,7 +694,9 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                         Icon(
                           isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
                           size: 16,
-                          color: isLiked ? Colors.blueAccent : Colors.grey[600],
+                          color: isLiked
+                              ? AppColors.likeActive
+                              : AppColors.textSecondary,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -694,8 +704,8 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                           style: TextStyle(
                             fontSize: 13,
                             color: isLiked
-                                ? Colors.blueAccent
-                                : Colors.grey[700],
+                                ? AppColors.likeActive
+                                : AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -717,10 +727,10 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
       builder: (innerContext) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
+          decoration: const BoxDecoration(
+            color: AppColors.cardBg,
             border: Border(
-              top: BorderSide(color: Colors.grey[300]!, width: 0.5),
+              top: BorderSide(color: AppColors.border, width: 0.5),
             ),
           ),
           child: SafeArea(
@@ -731,14 +741,14 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                  decoration: const BoxDecoration(
+                    color: AppColors.inputBg,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     icon: const Icon(
                       Icons.add,
-                      color: Colors.black87,
+                      color: AppColors.textPrimary,
                       size: 20,
                     ),
                     onPressed: () {},
@@ -749,22 +759,25 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: AppColors.inputBg,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: TextField(
                       controller: _commentController,
                       onSubmitted: (_) => _submitComment(innerContext),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Añade un comentario',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: TextStyle(color: AppColors.textMuted),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
+                        contentPadding: EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
                         ),
                       ),
-                      style: const TextStyle(fontSize: 15),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -774,11 +787,15 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.grey[800],
+                    color: AppColors.accentGreen,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.send,
+                      color: AppColors.scaffoldBg,
+                      size: 20,
+                    ),
                     onPressed: () => _submitComment(innerContext),
                   ),
                 ),

@@ -11,6 +11,7 @@ import '../../repository/categoria_service.dart';
 import '../../components/user_avatar.dart';
 import 'vista_login.dart';
 import 'vista_categorias.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 
 class VistaTopicos extends StatefulWidget {
   const VistaTopicos({super.key});
@@ -42,10 +43,13 @@ class _VistaTopicosState extends State<VistaTopicos> {
         appBar: AppBar(
           title: const Text(
             'r/LoopTalk',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.cardBg,
+          foregroundColor: AppColors.textPrimary,
           centerTitle: false,
           leading: Builder(
             builder: (BuildContext context) {
@@ -68,10 +72,10 @@ class _VistaTopicosState extends State<VistaTopicos> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               const DrawerHeader(
-                decoration: BoxDecoration(color: Colors.deepPurple),
+                decoration: BoxDecoration(color: AppColors.cardBg),
                 child: Text(
                   'Menú',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 24),
                 ),
               ),
               ListTile(
@@ -111,6 +115,7 @@ class _VistaTopicosState extends State<VistaTopicos> {
                 itemBuilder: (context, index) {
                   final topico = state.topicos[index];
                   return Card(
+                    color: AppColors.cardBg,
                     margin: const EdgeInsets.symmetric(
                       vertical: 6.0,
                       horizontal: 8.0,
@@ -118,6 +123,10 @@ class _VistaTopicosState extends State<VistaTopicos> {
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
+                      side: const BorderSide(
+                        color: AppColors.border,
+                        width: 0.5,
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -130,8 +139,8 @@ class _VistaTopicosState extends State<VistaTopicos> {
                               UserAvatar(
                                 userId: topico.autor?.id,
                                 radius: 12,
-                                backgroundColor: Colors.blueGrey,
-                                iconColor: Colors.white,
+                                backgroundColor: AppColors.surfaceBg,
+                                iconColor: AppColors.textSecondary,
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -140,7 +149,7 @@ class _VistaTopicosState extends State<VistaTopicos> {
                                     : 'u/Anonimo',
                                 style: const TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -150,7 +159,7 @@ class _VistaTopicosState extends State<VistaTopicos> {
                                     : 'r/General',
                                 style: const TextStyle(
                                   fontSize: 13,
-                                  color: Colors.blue,
+                                  color: AppColors.accentGreen,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -168,12 +177,16 @@ class _VistaTopicosState extends State<VistaTopicos> {
                             style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             topico.mensaje,
-                            style: const TextStyle(fontSize: 14),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -193,20 +206,22 @@ class _VistaTopicosState extends State<VistaTopicos> {
                                       if (loadingProgress == null) return child;
                                       return Container(
                                         height: 150,
-                                        color: Colors.grey[200],
+                                        color: AppColors.surfaceBg,
                                         child: const Center(
-                                          child: CircularProgressIndicator(),
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.accentGreen,
+                                          ),
                                         ),
                                       );
                                     },
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     height: 150,
-                                    color: Colors.grey[200],
+                                    color: AppColors.surfaceBg,
                                     child: const Center(
                                       child: Icon(
                                         Icons.broken_image,
-                                        color: Colors.grey,
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                   );
@@ -223,21 +238,21 @@ class _VistaTopicosState extends State<VistaTopicos> {
                                   Icon(
                                     Icons.arrow_upward,
                                     size: 20,
-                                    color: Colors.grey,
+                                    color: AppColors.textSecondary,
                                   ),
                                   SizedBox(width: 4),
                                   Text(
                                     '0',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.grey,
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                   SizedBox(width: 4),
                                   Icon(
                                     Icons.arrow_downward,
                                     size: 20,
-                                    color: Colors.grey,
+                                    color: AppColors.textSecondary,
                                   ),
                                 ],
                               ),
@@ -246,19 +261,23 @@ class _VistaTopicosState extends State<VistaTopicos> {
                                   Icon(
                                     Icons.comment,
                                     size: 18,
-                                    color: Colors.grey,
+                                    color: AppColors.textSecondary,
                                   ),
                                   SizedBox(width: 4),
                                   Text(
                                     '0 Comentarios',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.grey,
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
                               ),
-                              Icon(Icons.share, size: 18, color: Colors.grey),
+                              Icon(
+                                Icons.share,
+                                size: 18,
+                                color: AppColors.textSecondary,
+                              ),
                             ],
                           ),
                         ],

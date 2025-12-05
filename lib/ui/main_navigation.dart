@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loop_talk/bloc/topico_bloc.dart';
 import 'package:loop_talk/bloc/topico_event.dart';
 import 'package:loop_talk/ui/create_topic_page.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'vista_inicio.dart';
@@ -22,7 +23,8 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   static const _tutorialPrefKeyCreateLoop = 'tutorial_create_loop_shown';
-  static const _tutorialPrefKeyCreateCategory = 'tutorial_create_category_shown';
+  static const _tutorialPrefKeyCreateCategory =
+      'tutorial_create_category_shown';
 
   int _currentIndex = 0;
   final GlobalKey _fabKey = GlobalKey();
@@ -43,8 +45,10 @@ class _MainNavigationState extends State<MainNavigation> {
     _isCheckingTutorial = true;
     final prefs = await SharedPreferences.getInstance();
     final userId = _currentUserId();
-    _tutorialAlreadySeen = prefs.getBool('${_tutorialPrefKeyCreateLoop}_$userId') ?? false;
-    _categoryTutorialSeen = prefs.getBool('${_tutorialPrefKeyCreateCategory}_$userId') ?? false;
+    _tutorialAlreadySeen =
+        prefs.getBool('${_tutorialPrefKeyCreateLoop}_$userId') ?? false;
+    _categoryTutorialSeen =
+        prefs.getBool('${_tutorialPrefKeyCreateCategory}_$userId') ?? false;
     _isCheckingTutorial = false;
     if (!_tutorialAlreadySeen && mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
@@ -63,10 +67,12 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     // showAppBar se calcula después de construir las páginas (depende del índice final de Perfil)
-    
+
     // Obtener rol desde AuthBloc (si está autenticado)
     final authState = context.read<AuthBloc>().state;
-    final bool isEstudiante = authState is AuthSuccess && authState.usuario.rol.name.toUpperCase() == 'ESTUDIANTE';
+    final bool isEstudiante =
+        authState is AuthSuccess &&
+        authState.usuario.rol.name.toUpperCase() == 'ESTUDIANTE';
 
     // Construir listas de páginas e íconos según el rol
     final List<Widget> pages = isEstudiante
@@ -105,7 +111,10 @@ class _MainNavigationState extends State<MainNavigation> {
 
     // Ocultar AppBar cuando estemos en la vista de perfil o inicio (índice 0)
     // La última página (VistaPrueba) no tiene AppBar personalizado
-    final bool showAppBar = _currentIndex != 0 && _currentIndex != (pages.length - 2) && _currentIndex != (pages.length - 1);
+    final bool showAppBar =
+        _currentIndex != 0 &&
+        _currentIndex != (pages.length - 2) &&
+        _currentIndex != (pages.length - 1);
 
     return Scaffold(
       appBar: showAppBar
@@ -113,18 +122,18 @@ class _MainNavigationState extends State<MainNavigation> {
               title: Text(
                 pageTitles[_currentIndex],
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: AppColors.scaffoldBg,
               elevation: 0,
               automaticallyImplyLeading: false,
               actions: const [],
             )
           : null,
       body: IndexedStack(index: _currentIndex, children: pages),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBg,
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
               key: _fabKey,
@@ -140,10 +149,10 @@ class _MainNavigationState extends State<MainNavigation> {
                   topicoBloc.add(LoadTopicos());
                 });
               },
-              backgroundColor: Colors.black87,
+              backgroundColor: AppColors.accentGreen,
               child: const Icon(
                 Icons.chat_bubble,
-                color: Colors.white,
+                color: AppColors.scaffoldBg,
                 size: 28,
               ),
             )
@@ -151,10 +160,10 @@ class _MainNavigationState extends State<MainNavigation> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBg,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, -2),
             ),
@@ -176,26 +185,61 @@ class _MainNavigationState extends State<MainNavigation> {
             });
           },
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: Colors.black87,
-          unselectedItemColor: Colors.grey[500],
+          backgroundColor: AppColors.cardBg,
+          selectedItemColor: AppColors.accentGreen,
+          unselectedItemColor: AppColors.textSecondary,
           selectedFontSize: 0,
           unselectedFontSize: 0,
           showUnselectedLabels: false,
           showSelectedLabels: false,
           elevation: 0,
-            items: isEstudiante
-                ? [
-                    _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: '', index: 0),
-                    _buildNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: '', index: 1),
-                    _buildNavItem(icon: Icons.analytics_outlined, activeIcon: Icons.analytics, label: '', index: 2),
-                  ]
-                : [
-                    _buildNavItem(icon: Icons.home_outlined, activeIcon: Icons.home, label: '', index: 0),
-                    _buildNavItem(icon: Icons.explore_outlined, activeIcon: Icons.explore, label: '', index: 1),
-                    _buildNavItem(icon: Icons.person_outline, activeIcon: Icons.person, label: '', index: 2),
-                    _buildNavItem(icon: Icons.analytics_outlined, activeIcon: Icons.analytics, label: '', index: 3),
-                  ],
+          items: isEstudiante
+              ? [
+                  _buildNavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home,
+                    label: '',
+                    index: 0,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.person_outline,
+                    activeIcon: Icons.person,
+                    label: '',
+                    index: 1,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.analytics_outlined,
+                    activeIcon: Icons.analytics,
+                    label: '',
+                    index: 2,
+                  ),
+                ]
+              : [
+                  _buildNavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home,
+                    label: '',
+                    index: 0,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.explore_outlined,
+                    activeIcon: Icons.explore,
+                    label: '',
+                    index: 1,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.person_outline,
+                    activeIcon: Icons.person,
+                    label: '',
+                    index: 2,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.analytics_outlined,
+                    activeIcon: Icons.analytics,
+                    label: '',
+                    index: 3,
+                  ),
+                ],
         ),
       ),
     );
@@ -234,7 +278,8 @@ class _MainNavigationState extends State<MainNavigation> {
             align: ContentAlign.top,
             builder: (context, controller) => _buildTutorialContent(
               title: 'Crea tu primer Loop',
-              description: 'Toca este botón para compartir una idea o iniciar una conversación.',
+              description:
+                  'Toca este botón para compartir una idea o iniciar una conversación.',
               onNext: controller.next,
             ),
           ),
@@ -253,7 +298,9 @@ class _MainNavigationState extends State<MainNavigation> {
       return;
     }
     if (_categoryFabKey.currentContext == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowCategoryTutorial());
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _maybeShowCategoryTutorial(),
+      );
       return;
     }
 
@@ -268,7 +315,8 @@ class _MainNavigationState extends State<MainNavigation> {
             align: ContentAlign.top,
             builder: (context, controller) => _buildTutorialContent(
               title: 'Crea una categoría',
-              description: 'Como moderador puedes agregar nuevas categorías para organizar los Loops.',
+              description:
+                  'Como moderador puedes agregar nuevas categorías para organizar los Loops.',
               onNext: controller.next,
             ),
           ),

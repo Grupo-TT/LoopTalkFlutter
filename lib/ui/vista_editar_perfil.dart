@@ -12,6 +12,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'package:loop_talk/services/firebase_storage_service.dart';
 import 'package:loop_talk/services/firebase_profile_service.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 
 class VistaEditarPerfil extends StatefulWidget {
   const VistaEditarPerfil({super.key});
@@ -261,18 +262,21 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
         final isLoading = state is AuthLoading;
 
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.scaffoldBg,
           appBar: AppBar(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: AppColors.cardBg,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                color: AppColors.textPrimary,
+              ),
               onPressed: _confirmarSalir,
             ),
             title: const Text(
               'Editar perfil',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -285,14 +289,14 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
-                      color: Colors.white,
+                      color: AppColors.accentGreen,
                       strokeWidth: 2,
                     ),
                   ),
                 )
               else
                 IconButton(
-                  icon: const Icon(Icons.check, color: Colors.white),
+                  icon: const Icon(Icons.check, color: AppColors.accentGreen),
                   onPressed: _guardarCambios,
                 ),
             ],
@@ -311,7 +315,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                       height: 110,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 2),
+                        border: Border.all(color: AppColors.border, width: 2),
                       ),
                       child: ClipOval(
                         child: _imagenSeleccionada != null
@@ -322,7 +326,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                             : const Icon(
                                 Icons.person,
                                 size: 60,
-                                color: Colors.black,
+                                color: AppColors.textSecondary,
                               ),
                       ),
                     ),
@@ -335,13 +339,16 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.grey[300],
-                            border: Border.all(color: Colors.white, width: 2),
+                            color: AppColors.surfaceBg,
+                            border: Border.all(
+                              color: AppColors.cardBg,
+                              width: 2,
+                            ),
                           ),
                           child: const Icon(
                             Icons.camera_alt,
                             size: 20,
-                            color: Colors.black,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -355,14 +362,24 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
               // NOMBRE
               TextField(
                 controller: _nombreController,
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Nombre',
+                  labelStyle: const TextStyle(color: AppColors.textSecondary),
+                  filled: true,
+                  fillColor: AppColors.inputBg,
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+                    borderSide: const BorderSide(
+                      color: AppColors.border,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 1),
+                    borderSide: BorderSide(
+                      color: AppColors.accentGreen,
+                      width: 1,
+                    ),
                   ),
                 ),
               ),
@@ -373,14 +390,24 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
               TextField(
                 controller: _correoController,
                 enabled: false,
+                style: const TextStyle(color: AppColors.textMuted),
                 decoration: InputDecoration(
                   labelText: 'Correo electrónico',
+                  labelStyle: const TextStyle(color: AppColors.textMuted),
+                  filled: true,
+                  fillColor: AppColors.inputBg,
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+                    borderSide: const BorderSide(
+                      color: AppColors.border,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 1),
+                    borderSide: BorderSide(
+                      color: AppColors.accentGreen,
+                      width: 1,
+                    ),
                   ),
                 ),
               ),
@@ -389,7 +416,9 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
 
               if (isLoading)
                 const Center(
-                  child: CircularProgressIndicator(color: Colors.black),
+                  child: CircularProgressIndicator(
+                    color: AppColors.accentGreen,
+                  ),
                 ),
             ],
           ),

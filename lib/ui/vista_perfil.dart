@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../bloc/auth_bloc.dart';
@@ -64,7 +65,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.scaffoldBg,
         body: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             if (state is AuthSuccess) {
@@ -84,9 +85,9 @@ class _VistaPerfilState extends State<VistaPerfil> {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.cardBg,
                               border: Border.all(
-                                color: Colors.grey[300]!,
+                                color: AppColors.border,
                                 width: 1.5,
                               ),
                               borderRadius: BorderRadius.circular(8),
@@ -95,7 +96,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
                               padding: EdgeInsets.zero,
                               icon: const Icon(
                                 Icons.arrow_back,
-                                color: Colors.black87,
+                                color: AppColors.textPrimary,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -110,7 +111,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const Spacer(),
@@ -136,15 +137,15 @@ class _VistaPerfilState extends State<VistaPerfil> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.black,
+                                      color: AppColors.border,
                                       width: 2,
                                     ),
                                   ),
                                   child: UserAvatarStream(
                                     userId: usuario.id,
                                     radius: 40,
-                                    backgroundColor: Colors.white,
-                                    iconColor: Colors.black,
+                                    backgroundColor: AppColors.surfaceBg,
+                                    iconColor: AppColors.textSecondary,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -153,15 +154,15 @@ class _VistaPerfilState extends State<VistaPerfil> {
                                   style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   usuario.correoElectronico,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.grey[600],
+                                    color: AppColors.textSecondary,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
@@ -316,7 +317,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
@@ -326,11 +327,15 @@ class _VistaPerfilState extends State<VistaPerfil> {
                 Container(
                   width: 64,
                   height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                  decoration: const BoxDecoration(
+                    color: AppColors.surfaceBg,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.logout, size: 32, color: Colors.grey[700]),
+                  child: const Icon(
+                    Icons.logout,
+                    size: 32,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 // Título
@@ -339,17 +344,17 @@ class _VistaPerfilState extends State<VistaPerfil> {
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
                 // Descripción
-                Text(
+                const Text(
                   'Estás a punto de salir de tu cuenta en este dispositivo. Podrás volver a entrar iniciando sesión nuevamente.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                     height: 1.5,
                   ),
                 ),
@@ -364,8 +369,8 @@ class _VistaPerfilState extends State<VistaPerfil> {
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(
-                            color: Colors.grey[300]!,
+                          side: const BorderSide(
+                            color: AppColors.border,
                             width: 1.5,
                           ),
                           shape: RoundedRectangleBorder(
@@ -375,7 +380,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
                         child: const Text(
                           'Cancelar',
                           style: TextStyle(
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -395,7 +400,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black87,
+                          backgroundColor: AppColors.accentGreen,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -404,7 +409,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
                         child: const Text(
                           'Cerrar sesión',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.scaffoldBg,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -423,10 +428,10 @@ class _VistaPerfilState extends State<VistaPerfil> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.grey[500],
+        color: AppColors.textMuted,
       ),
     );
   }
@@ -434,7 +439,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
   Widget _buildGeneralSection(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -514,7 +519,7 @@ class _VistaPerfilState extends State<VistaPerfil> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                Icon(icon, size: 24, color: iconColor ?? Colors.black),
+                Icon(icon, size: 24, color: iconColor ?? AppColors.textPrimary),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -525,32 +530,37 @@ class _VistaPerfilState extends State<VistaPerfil> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          color: titleColor ?? Colors.black,
+                          color: titleColor ?? AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: Colors.grey[400],
+                  color: AppColors.textMuted,
                 ),
               ],
             ),
           ),
         ),
         if (showDivider)
-          Divider(height: 1, thickness: 1, color: Colors.grey[300], indent: 56),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.border,
+            indent: 56,
+          ),
       ],
     );
   }

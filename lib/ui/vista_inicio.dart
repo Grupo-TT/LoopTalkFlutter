@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loop_talk/theme/app_theme.dart';
 import '../bloc/topico_bloc.dart';
 import '../bloc/topico_event.dart';
 import '../bloc/topico_state.dart';
@@ -40,12 +41,12 @@ class _VistaInicioState extends State<VistaInicio> {
   @override
   void initState() {
     super.initState();
-    // Configurar el estilo de la barra de estado para que sea blanca
+    // Configurar el estilo de la barra de estado para modo oscuro
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarColor: AppColors.scaffoldBg,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
     );
 
@@ -100,7 +101,7 @@ class _VistaInicioState extends State<VistaInicio> {
         }
       },
       child: ColoredBox(
-        color: Colors.white,
+        color: AppColors.scaffoldBg,
         child: Column(
           children: [
             AnimatedContainer(
@@ -108,7 +109,7 @@ class _VistaInicioState extends State<VistaInicio> {
               height: _isHeaderVisible
                   ? kToolbarHeight + MediaQuery.of(context).padding.top
                   : 0,
-              color: Colors.white,
+              color: AppColors.scaffoldBg,
               child: _isHeaderVisible
                   ? _buildHeader()
                   : const SizedBox.shrink(),
@@ -117,7 +118,11 @@ class _VistaInicioState extends State<VistaInicio> {
               child: BlocBuilder<TopicoBloc, TopicoState>(
                 builder: (context, state) {
                   if (state is TopicoLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.accentGreen,
+                      ),
+                    );
                   }
 
                   if (state is TopicoLoaded) {
@@ -252,11 +257,11 @@ class _VistaInicioState extends State<VistaInicio> {
 
   Widget _buildHeader() {
     return ColoredBox(
-      color: Colors.white,
+      color: AppColors.scaffoldBg,
       child: SafeArea(
         bottom: false,
         child: Container(
-          decoration: const BoxDecoration(color: Colors.white),
+          decoration: const BoxDecoration(color: AppColors.scaffoldBg),
           padding: const EdgeInsets.only(
             left: 20,
             right: 20,
@@ -320,7 +325,7 @@ class _VistaInicioState extends State<VistaInicio> {
                       child: const Text(
                         'Cancelar',
                         style: TextStyle(
-                          color: Colors.black87,
+                          color: AppColors.accentGreen,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -335,7 +340,7 @@ class _VistaInicioState extends State<VistaInicio> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const Spacer(),
@@ -344,18 +349,15 @@ class _VistaInicioState extends State<VistaInicio> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: Colors.grey[300]!,
-                          width: 1.5,
-                        ),
+                        color: AppColors.cardBg,
+                        border: Border.all(color: AppColors.border, width: 1.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IconButton(
                         padding: EdgeInsets.zero,
                         icon: const Icon(
                           Icons.search,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                           size: 20,
                         ),
                         onPressed: () {
@@ -393,13 +395,13 @@ class _VistaInicioState extends State<VistaInicio> {
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 '¿Qué tema quieres explorar hoy?',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
               ),
             ],
           ),
@@ -426,7 +428,7 @@ class _VistaInicioState extends State<VistaInicio> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -483,10 +485,10 @@ class _VistaInicioState extends State<VistaInicio> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black87 : Colors.transparent,
+          color: isSelected ? AppColors.accentGreen : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.black87 : Colors.grey[300]!,
+            color: isSelected ? AppColors.accentGreen : AppColors.border,
             width: 1.5,
           ),
         ),
@@ -495,7 +497,7 @@ class _VistaInicioState extends State<VistaInicio> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected ? AppColors.scaffoldBg : AppColors.textPrimary,
           ),
         ),
       ),
@@ -503,20 +505,20 @@ class _VistaInicioState extends State<VistaInicio> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.forum_outlined, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          Icon(Icons.forum_outlined, size: 80, color: AppColors.textSecondary),
+          SizedBox(height: 16),
           Text(
             'No hay tópicos disponibles',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             '¡Sé el primero en iniciar una conversación!',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14, color: AppColors.textMuted),
           ),
         ],
       ),
@@ -630,12 +632,12 @@ class _VistaInicioState extends State<VistaInicio> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[300]!, width: 1.5),
+        border: Border.all(color: AppColors.border, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -664,8 +666,8 @@ class _VistaInicioState extends State<VistaInicio> {
                     UserAvatar(
                       userId: autor?.id,
                       radius: 20,
-                      backgroundColor: Colors.grey[200],
-                      iconColor: Colors.grey[600],
+                      backgroundColor: AppColors.surfaceBg,
+                      iconColor: AppColors.textSecondary,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -677,15 +679,15 @@ class _VistaInicioState extends State<VistaInicio> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             tiempoPublicacion,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -693,9 +695,9 @@ class _VistaInicioState extends State<VistaInicio> {
                     ),
                     if (hasActions)
                       IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.more_vert,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                           size: 20,
                         ),
                         onPressed: () => _showTopicoActions(topico),
@@ -719,16 +721,16 @@ class _VistaInicioState extends State<VistaInicio> {
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: AppColors.textPrimary,
                               height: 1.3,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             topico.mensaje,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[700],
+                              color: AppColors.textSecondary,
                               height: 1.5,
                             ),
                             maxLines: 3,
@@ -800,15 +802,16 @@ class _VistaInicioState extends State<VistaInicio> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: AppColors.surfaceBg,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border, width: 1),
                       ),
                       child: Text(
                         '#$categoria',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
