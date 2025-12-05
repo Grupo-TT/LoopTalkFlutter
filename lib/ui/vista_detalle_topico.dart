@@ -362,8 +362,9 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                                       fit: BoxFit.cover,
                                       loadingBuilder:
                                           (context, child, loadingProgress) {
-                                            if (loadingProgress == null)
+                                            if (loadingProgress == null) {
                                               return child;
+                                            }
                                             return Container(
                                               color: Colors.grey[200],
                                               child: const Center(
@@ -396,7 +397,9 @@ class _VistaDetalleTopicoState extends State<VistaDetalleTopico> {
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.6),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.6,
+                                        ),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: const Row(

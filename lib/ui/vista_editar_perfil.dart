@@ -180,7 +180,7 @@ class _VistaEditarPerfilState extends State<VistaEditarPerfil> {
         );
 
         // Save photo URL to Firestore so other users can see it
-        if (userId != null && fotoUrl != null) {
+        if (userId != null) {
           final profileService = FirebaseProfileService();
           await profileService.saveProfilePhoto(userId, fotoUrl);
         }

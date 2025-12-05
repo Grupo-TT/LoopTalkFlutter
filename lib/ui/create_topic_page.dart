@@ -15,8 +15,7 @@ import 'package:loop_talk/bloc/topico_bloc.dart';
 import 'package:loop_talk/bloc/topico_event.dart';
 import 'package:loop_talk/model/topico.dart';
 import 'package:loop_talk/components/snackbar_helper.dart';
-import 'package:speech_to_text/speech_to_text.dart'
-    show SpeechToText, ListenMode;
+import 'package:speech_to_text/speech_to_text.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -118,11 +117,8 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
     _textBeforeListening = _messageController.text;
     await _speechToText.listen(
       onResult: _onSpeechResult,
-      listenMode: ListenMode.dictation,
       pauseFor: const Duration(seconds: 10),
       listenFor: const Duration(minutes: 10),
-      partialResults: true,
-      cancelOnError: false,
     );
     setState(() {
       _isListening = true;
@@ -547,7 +543,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
           if (_isUploadingImage)
             Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(11),
               ),
               child: const Center(
