@@ -62,7 +62,7 @@ class _LoopTalkAppState extends State<LoopTalkApp> {
   @override
   void initState() {
     super.initState();
-    // Se asegura de remover el splash screen después de que la app está lista.
+    
     FlutterNativeSplash.remove();
   }
 

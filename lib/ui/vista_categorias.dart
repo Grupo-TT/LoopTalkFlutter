@@ -16,6 +16,14 @@ class VistaCategorias extends StatefulWidget {
 }
 
 class _VistaCategoriasState extends State<VistaCategorias> {
+  final List<Color> _cardColors = const [
+    Color(0xFF929ED8),
+    Color(0xFF92999E),
+    Color(0xFFDFD565),
+    Color(0xFF81BC79),
+    Color(0xFFD9907C),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -44,8 +52,6 @@ class _VistaCategoriasState extends State<VistaCategorias> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Categoría creada correctamente')),
             );
-            // Si el bloc ya emitió CategoriaLoaded (ver lógica del bloc), la UI
-            // se actualizará automáticamente. No forzamos un reload aquí.
           } else if (state is CategoriaError) {
             ScaffoldMessenger.of(
               context,
@@ -65,7 +71,11 @@ class _VistaCategoriasState extends State<VistaCategorias> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.category_outlined, size: 80, color: Colors.grey[400]),
+                      Icon(
+                        Icons.category_outlined,
+                        size: 80,
+                        color: Colors.grey[400],
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'No hay categorías disponibles',
@@ -80,100 +90,63 @@ class _VistaCategoriasState extends State<VistaCategorias> {
                   ),
                 );
               }
-              return Padding(
+              return ListView.separated(
                 padding: const EdgeInsets.all(20.0),
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16.0,
-                    crossAxisSpacing: 16.0,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: categorias.length,
-                  itemBuilder: (context, index) {
-                    final categoria = categorias[index];
-                    return InkWell(
-                      onTap: () => _openEditDialog(context, categoria),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Colors.grey[300]!,
-                            width: 1.5,
+                itemCount: categorias.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final categoria = categorias[index];
+                  final cardColor = _cardColors[index % _cardColors.length];
+
+                  return InkWell(
+                    onTap: () => _openEditDialog(context, categoria),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              categoria.nombre,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              categoria.descripcion,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[800],
+                                height: 1.4,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.category,
-                                      color: Colors.grey[700],
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    categoria.nombre,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    categoria.descripcion,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey[600],
-                                      height: 1.4,
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 14,
-                                    color: Colors.grey[400],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               );
             }
 

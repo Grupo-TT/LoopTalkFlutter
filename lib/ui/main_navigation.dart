@@ -109,8 +109,6 @@ class _MainNavigationState extends State<MainNavigation> {
       _currentIndex = 0;
     }
 
-    // Ocultar AppBar cuando estemos en la vista de perfil o inicio (índice 0)
-    // La última página (VistaPrueba) no tiene AppBar personalizado
     final bool showAppBar =
         _currentIndex != 0 &&
         _currentIndex != (pages.length - 2) &&
