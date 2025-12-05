@@ -3,23 +3,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirebaseLikesService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Dar like a un post
+  
   Future<void> likePost(int postId, String userId) async {
     final postRef = _firestore.collection('posts').doc(postId.toString());
     final likeRef = postRef.collection('likes').doc(userId);
 
-    // Verificar si ya dio like
+    
     final likeDoc = await likeRef.get();
     final alreadyLiked = likeDoc.exists && (likeDoc.data()?['liked'] == true);
 
     if (alreadyLiked) {
-      // Quitar like
+      
       await likeRef.delete();
       await postRef.update({
         'likesCount': FieldValue.increment(-1),
       });
     } else {
-      // Dar like
+      
       await likeRef.set({
         'liked': true,
         'disliked': false,
@@ -31,7 +31,7 @@ class FirebaseLikesService {
     }
   }
 
-  // Dar dislike a un post
+  
   Future<void> dislikePost(int postId, String userId) async {
     final postRef = _firestore.collection('posts').doc(postId.toString());
     final likeRef = postRef.collection('likes').doc(userId);
@@ -56,7 +56,7 @@ class FirebaseLikesService {
     }
   }
 
-  // Obtener contador de likes en tiempo real
+  
   Stream<int> getLikesCount(int postId) {
     return _firestore
         .collection('posts')
@@ -64,7 +64,7 @@ class FirebaseLikesService {
         .snapshots()
         .map((doc) {
       if (!doc.exists) {
-        // Si el documento no existe, inicializarlo con 0
+        
         _initializePost(postId);
         return 0;
       }
@@ -72,7 +72,7 @@ class FirebaseLikesService {
     });
   }
 
-  // Obtener contador de dislikes en tiempo real
+  
   Stream<int> getDislikesCount(int postId) {
     return _firestore
         .collection('posts')
@@ -87,7 +87,7 @@ class FirebaseLikesService {
     });
   }
 
-  // Verificar si el usuario ya dio like
+  
   Future<bool> hasUserLiked(int postId, String userId) async {
     final doc = await _firestore
         .collection('posts')
@@ -98,7 +98,7 @@ class FirebaseLikesService {
     return doc.exists && (doc.data()?['liked'] == true);
   }
 
-  // Verificar si el usuario dio dislike
+  
   Future<bool> hasUserDisliked(int postId, String userId) async {
     final doc = await _firestore
         .collection('posts')
@@ -123,7 +123,7 @@ class FirebaseLikesService {
     }
   }
 
-  // Inicializar post cuando se crea (llamar desde tu app)
+  
   Future<void> initializePost(int postId) async {
     await _initializePost(postId);
   }

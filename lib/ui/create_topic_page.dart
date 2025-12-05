@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loop_talk/bloc/auth_bloc.dart';
 import 'package:loop_talk/bloc/auth_state.dart';
@@ -159,9 +158,9 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
             color: Colors.white,
         child: Column(
               children: [
-                // Header con usuario
+               
                 _buildUserHeader(),
-                // Contenido scrollable
+                
                 Expanded(
                   child: Form(
                     key: _formKey,
@@ -179,13 +178,13 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
                           const SizedBox(height: 32),
                           // Sección de categorías
                           _buildCategorySection(),
-                          const SizedBox(height: 100), // Espacio para los botones inferiores
+                          const SizedBox(height: 100), 
                         ],
                       ),
                     ),
                   ),
                 ),
-                // Botones inferiores
+                
                 _buildBottomActions(),
               ],
             ),
@@ -529,7 +528,7 @@ class _CreateTopicFormState extends State<CreateTopicForm> {
         top: false,
         child: Row(
           children: [
-            // Botón de agregar media
+            
             Container(
               width: 50,
               height: 50,
